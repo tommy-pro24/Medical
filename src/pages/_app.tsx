@@ -5,6 +5,7 @@ import Navbar from '@/components/navbar'
 import List from '@/components/list'
 import Foot from '@/components/foot'
 import { useRouter } from 'next/router'
+import { DataProvider } from '@/context/DataContext'
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
@@ -15,15 +16,17 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#101624] via-[#111827] to-[#181f2a]">
-      <Navbar />
-      <div className="flex">
-        <List />
-        <main className="flex-1 min-h-screen flex flex-col items-center">
-          <Component {...pageProps} />
-        </main>
+    <DataProvider>
+      <div className="min-h-screen bg-gradient-to-br from-[#101624] via-[#111827] to-[#181f2a]">
+        <Navbar />
+        <div className="flex">
+          <List />
+          <main className="flex-1 min-h-screen flex flex-col items-center">
+            <Component {...pageProps} />
+          </main>
+        </div>
+        <Foot />
       </div>
-      <Foot />
-    </div>
+    </DataProvider>
   )
 }
