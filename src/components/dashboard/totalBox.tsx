@@ -2,7 +2,6 @@ import LowProducts from "../ui/lowProducts";
 import Orders from "../ui/orders";
 import TotalProduct from "../ui/totalProduct";
 import Transit from "../ui/transit";
-import Delivered from "../ui/delivered";
 
 export default function TotalBox() {
     // Color palette for a modern dark dashboard
@@ -63,7 +62,7 @@ export default function TotalBox() {
             style: 1
         },
         {
-            title: "Pending Orders",
+            title: "Pending",
             value: "5",
             desc: "Awaiting processing",
             Icon: Orders,
@@ -77,10 +76,10 @@ export default function TotalBox() {
             style: 3
         },
         {
-            title: "Delivered",
+            title: "Pending",
             value: "5",
             desc: "Completed deliveries",
-            Icon: Delivered,
+            Icon: Orders,
             style: 4
         }
     ];
