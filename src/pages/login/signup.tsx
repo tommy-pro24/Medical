@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { request } from '@/lib/request';
+import { toast } from '../../hooks/use-toast';
 
 export default function Signup() {
     const [showPassword, setShowPassword] = useState(false);
@@ -15,14 +17,51 @@ export default function Signup() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             setPasswordError('Passwords do not match');
             return;
         }
+
+        // Basic validation
+        if (!email || !username || !phoneNumber || !password) {
+            toast({
+                title: "Error",
+                description: "All fields are required",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            const response = await request({
+                method: "POST",
+                url: "/auth/register",
+                data: {
+                    name: username.trim(),
+                    email: email.trim(),
+                    password: password,
+                    phone: phoneNumber.trim()
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }, {
+                successMessage: "Registration successful! Please verify your email.",
+                errorMessage: "Registration failed. Please try again.",
+                showToast: true
+            });
+
+            if (response) {
+                // Redirect to login page or handle successful registration
+                window.location.href = '/login/signin';
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+        }
+
         setPasswordError('');
-        console.log('Sign up:', { email, username, phoneNumber, password });
     };
 
     const containerVariants = {
