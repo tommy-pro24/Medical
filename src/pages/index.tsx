@@ -19,7 +19,7 @@ export default function Home() {
 
     }
 
-  }, [])
+  }, [router])
 
   return (
     <main className="m-0 px-4 sm:px-8 md:px-12 lg:px-20 bg-[#0f1729] w-full flex flex-col gap-5 min-h-screen text-white">
