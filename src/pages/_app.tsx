@@ -6,13 +6,19 @@ import List from '@/components/list'
 import Foot from '@/components/foot'
 import { useRouter } from 'next/router'
 import { DataProvider } from '@/context/DataContext'
+import { Toaster } from '@/components/ui/toaster'
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const isAuthPage = router.pathname === '/login/signin' || router.pathname === '/login/signup'
 
   if (isAuthPage) {
-    return <Component {...pageProps} />
+    return (
+      <>
+        <Component {...pageProps} />
+        <Toaster />
+      </>
+    )
   }
 
   return (
@@ -27,6 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
         </div>
         <Foot />
       </div>
+      <Toaster />
     </DataProvider>
   )
 }

@@ -3,8 +3,23 @@ import "react-date-range/dist/theme/default.css";
 import { DateRangePicker } from "@/components/ui/date-range-picker"
 import TotalBox from "@/components/dashboard/totalBox";
 import DashboardBarChart from "@/components/dashboard/DashboardBarChart";
+import { useEffect } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 export default function Home() {
+
+  const router = useRouter();
+
+  useEffect(() => {
+
+    if (!Cookies.get('id')) {
+
+      router.push('/login/signin');
+
+    }
+
+  }, [])
 
   return (
     <main className="m-0 px-4 sm:px-8 md:px-12 lg:px-20 bg-[#0f1729] w-full flex flex-col gap-5 min-h-screen text-white">
