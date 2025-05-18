@@ -7,6 +7,8 @@ import { useData } from "@/context/DataContext";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { request } from "@/lib/request";
+import Cookies from "js-cookie";
 
 interface InventoryProps {
     initialProducts?: Product[];
@@ -19,6 +21,8 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
     const [search, setSearch] = useState('');
 
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    const [productCounts, setProductCounts] = useState<Record<string, number>>({});
 
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -37,17 +41,41 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
     );
 
     const handleUpdateStock = (productId: string, newStock: number) => {
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            updateProduct({
-                ...product,
-                stockLevel: newStock
+
+        try {
+
+            request({
+                method: 'POST',
+                url: "/product/updateStock",
+                data: {
+                    id: productId,
+                    newStock: newStock
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Cookies.get('token')}`
+                }
             });
-            toast({
-                title: "Stock Updated",
-                description: `${product.name} stock level updated to ${newStock}`,
-            });
+
+            const product = products.find(p => p.id === productId);
+
+            if (product) {
+                updateProduct({
+                    ...product,
+                    stockLevel: newStock
+                });
+                toast({
+                    title: "Stock Updated",
+                    description: `${product.name} stock level updated to ${newStock}`,
+                });
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.log(error.message);
         }
+
+
     };
 
     const handleEditProduct = (product: Product) => {
@@ -114,7 +142,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                             <div className="text-sm">{product.description}</div>
 
                             <div className="pt-2 flex justify-between gap-2">
-                                <Button
+                                {/* <Button
                                     variant="outline"
                                     onClick={() => handleUpdateStock(product.id, product.stockLevel - 1)}
                                     disabled={product.stockLevel <= 0}
@@ -128,6 +156,22 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                                     className="flex-1"
                                 >
                                     + Stock In
+                                </Button> */}
+                                <Input
+                                    type="number"
+                                    value={productCounts[product.id] || 0}
+                                    onChange={(e) => setProductCounts(prev => ({
+                                        ...prev,
+                                        [product.id]: Number(e.target.value)
+                                    }))}
+                                    placeholder="Enter quantity"
+                                />
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handleUpdateStock(product.id, product.stockLevel + (productCounts[product.id] || 0))}
+                                    className="flex-1"
+                                >
+                                    Add
                                 </Button>
                             </div>
 
@@ -206,11 +250,29 @@ const ProductForm: React.FC<{
                 description: `${name} has been updated successfully`
             });
         } else {
-            addProduct(productData);
-            toast({
-                title: "Product Added",
-                description: `${name} has been added to inventory`
-            });
+
+            try {
+
+                request({
+                    method: "POST",
+                    url: '/product/addNewProduct',
+                    data: productData,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${Cookies.get('token')}`
+                    }
+                })
+
+                addProduct(productData);
+
+                toast({
+                    title: "Product Added",
+                    description: `${name} has been added to inventory`
+                });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                console.log(error.message);
+            }
         }
 
         onClose();
