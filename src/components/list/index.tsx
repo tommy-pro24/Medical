@@ -7,8 +7,11 @@ import { usePathname } from 'next/navigation';
 import { removeCookies } from '@/lib/userinfo';
 
 export default function List() {
+
     const [open, setOpen] = useState(false);
+
     const [inventoryOpen, setInventoryOpen] = useState(false);
+
     const pathname = usePathname();
 
     const handleLogout = () => {
