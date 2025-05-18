@@ -13,7 +13,7 @@ export default function Home() {
 
   useEffect(() => {
 
-    if (!Cookies.get('id')) {
+    if (!Cookies.get('_id')) {
 
       router.push('/login/signin');
 

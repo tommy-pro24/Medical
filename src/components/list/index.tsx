@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { removeCookies } from '@/lib/userinfo';
 
 export default function List() {
     const [open, setOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function List() {
     const pathname = usePathname();
 
     const handleLogout = () => {
-        console.log('Logging out...');
+        removeCookies();
     };
 
     const isActive = (path: string) => pathname === path;

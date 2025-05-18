@@ -24,12 +24,6 @@ export const request = async <T = any>(
         return res.data
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-        // Log the full error for debugging
-        console.error('Request error:', {
-            status: err?.response?.status,
-            data: err?.response?.data,
-            message: err?.message
-        });
 
         const description =
             err?.response?.data?.message ||
