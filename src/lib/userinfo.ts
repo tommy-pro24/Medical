@@ -24,3 +24,24 @@ export const storeUserInfo = (userData: Record<string, any>) => {
     }
 
 }
+
+
+export const removeCookies = () => {
+
+    try {
+
+        const allCookies = Cookies.get();
+
+        Object.keys(allCookies).forEach(cookieName => {
+            Cookies.remove(cookieName, { path: '' });
+            Cookies.remove(cookieName, { path: '/' });
+        });
+
+        window.location.href = '/';
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+
+    }
+
+}
