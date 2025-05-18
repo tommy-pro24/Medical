@@ -10,68 +10,7 @@ export const users: User[] = [
 ];
 
 // Mock Products
-export const products: Product[] = [
-    {
-        id: '1',
-        name: 'Blood Glucose Monitor',
-        category: 'diagnostic',
-        description: 'Reliable device for measuring blood glucose levels',
-        price: 2500,
-        stockLevel: 45,
-        lowStockThreshold: 10,
-        batchNumber: 'BG2023-05',
-        expiryDate: new Date('2025-06-15'),
-        image: 'https://placehold.co/200x200?text=Blood+Glucose+Monitor',
-    },
-    {
-        id: '2',
-        name: 'Surgical Gloves (Box of 100)',
-        category: 'surgical',
-        description: 'Sterile latex gloves for medical procedures',
-        price: 1200,
-        stockLevel: 8,
-        lowStockThreshold: 20,
-        batchNumber: 'SG2023-12',
-        expiryDate: new Date('2026-01-30'),
-        image: 'https://placehold.co/200x200?text=Surgical+Gloves',
-    },
-    {
-        id: '3',
-        name: 'Digital Thermometer',
-        category: 'diagnostic',
-        description: 'Quick and accurate temperature measurement',
-        price: 850,
-        stockLevel: 72,
-        lowStockThreshold: 15,
-        batchNumber: 'DT2023-09',
-        expiryDate: new Date('2027-10-22'),
-        image: 'https://placehold.co/200x200?text=Digital+Thermometer',
-    },
-    {
-        id: '4',
-        name: 'Disposable Syringes (Pack of 50)',
-        category: 'consumable',
-        description: 'Sterile syringes for single use',
-        price: 680,
-        stockLevel: 23,
-        lowStockThreshold: 25,
-        batchNumber: 'DS2023-07',
-        expiryDate: new Date('2025-05-18'),
-        image: 'https://placehold.co/200x200?text=Disposable+Syringes',
-    },
-    {
-        id: '5',
-        name: 'Stethoscope',
-        category: 'diagnostic',
-        description: 'Professional grade acoustic medical device',
-        price: 3200,
-        stockLevel: 15,
-        lowStockThreshold: 5,
-        batchNumber: 'ST2023-06',
-        expiryDate: new Date('2030-12-31'),
-        image: 'https://placehold.co/200x200?text=Stethoscope',
-    },
-];
+export const products: Product[] = [];
 
 // Mock Orders
 export const orders: Order[] = [

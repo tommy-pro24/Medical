@@ -7,14 +7,12 @@ export interface User {
 }
 
 export interface Product {
-    id: string;
+    _id: string;
     name: string;
     category: 'diagnostic' | 'surgical' | 'consumable' | 'other';
     description: string;
     price: number;
-    stockLevel: number;
-    batchNumber?: string;
-    expiryDate?: Date;
+    stockNumber: number;
     lowStockThreshold: number;
     image?: string;
 }

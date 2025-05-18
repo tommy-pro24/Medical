@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Package, Search, Plus, AlertTriangle } from 'lucide-react';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types";
 import { useData } from "@/context/DataContext";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,7 @@ interface InventoryProps {
 
 const Inventory = ({ initialProducts }: InventoryProps) => {
 
-    const { getProducts, updateProduct } = useData();
+    const { getProducts, updateProduct, setAllProduct } = useData();
 
     const [search, setSearch] = useState('');
 
@@ -40,6 +40,36 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
 
     );
 
+    useEffect(() => {
+
+        onLoad();
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const onLoad = async () => {
+
+        try {
+
+            const data = await request({
+                method: 'POST',
+                url: '/product/getAllProduct',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!data) return;
+
+            setAllProduct(data);
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.log(error.message);
+        }
+
+    }
+
     const handleUpdateStock = (productId: string, newStock: number) => {
 
         try {
@@ -57,12 +87,12 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                 }
             });
 
-            const product = products.find(p => p.id === productId);
+            const product = products.find(p => p._id === productId);
 
             if (product) {
                 updateProduct({
                     ...product,
-                    stockLevel: newStock
+                    stockNumber: newStock
                 });
                 toast({
                     title: "Stock Updated",
@@ -114,13 +144,13 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map(product => (
                     <Card
-                        key={product.id}
-                        className={`overflow-hidden ${product.stockLevel <= product.lowStockThreshold ? 'border-amber-500/50' : 'border-input'}`}
+                        key={product._id}
+                        className={`overflow-hidden ${product.stockNumber <= product.lowStockThreshold ? 'border-amber-500/50' : 'border-input'}`}
                     >
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg">{product.name}</CardTitle>
-                                {product.stockLevel <= product.lowStockThreshold && (
+                                {product.stockNumber <= product.lowStockThreshold && (
                                     <AlertTriangle className="h-5 w-5 text-amber-500" />
                                 )}
                             </div>
@@ -133,9 +163,9 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                                     <span>Stock Level:</span>
                                 </div>
                                 <div
-                                    className={`font-medium ${product.stockLevel <= product.lowStockThreshold ? 'text-amber-500' : 'text-foreground'}`}
+                                    className={`font-medium ${product.stockNumber <= product.lowStockThreshold ? 'text-amber-500' : 'text-foreground'}`}
                                 >
-                                    {product.stockLevel} units
+                                    {product.stockNumber} units
                                 </div>
                             </div>
 
@@ -144,31 +174,31 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                             <div className="pt-2 flex justify-between gap-2">
                                 {/* <Button
                                     variant="outline"
-                                    onClick={() => handleUpdateStock(product.id, product.stockLevel - 1)}
-                                    disabled={product.stockLevel <= 0}
+                                    onClick={() => handleUpdateStock(product._id, product.stockNumber - 1)}
+                                    disabled={product.stockNumber <= 0}
                                     className="flex-1"
                                 >
                                     - Stock Out
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => handleUpdateStock(product.id, product.stockLevel + 1)}
+                                    onClick={() => handleUpdateStock(product._id, product.stockNumber + 1)}
                                     className="flex-1"
                                 >
                                     + Stock In
                                 </Button> */}
                                 <Input
                                     type="number"
-                                    value={productCounts[product.id] || 0}
+                                    value={productCounts[product._id] || 0}
                                     onChange={(e) => setProductCounts(prev => ({
                                         ...prev,
-                                        [product.id]: Number(e.target.value)
+                                        [product._id]: Number(e.target.value)
                                     }))}
                                     placeholder="Enter quantity"
                                 />
                                 <Button
                                     variant="outline"
-                                    onClick={() => handleUpdateStock(product.id, product.stockLevel + (productCounts[product.id] || 0))}
+                                    onClick={() => handleUpdateStock(product._id, product.stockNumber + (productCounts[product._id] || 0))}
                                     className="flex-1"
                                 >
                                     Add
@@ -210,16 +240,23 @@ const ProductForm: React.FC<{
     product: Product | null;
     onClose: () => void;
 }> = ({ product, onClose }) => {
+
     const { addProduct, updateProduct } = useData();
 
     const [name, setName] = useState(product?.name || '');
+
     const [category, setCategory] = useState<Product['category']>(product?.category || 'diagnostic');
+
     const [description, setDescription] = useState(product?.description || '');
+
     const [price, setPrice] = useState(product?.price?.toString() || '');
-    const [stockLevel, setStockLevel] = useState(product?.stockLevel?.toString() || '');
+
+    const [stockLevel, setStockLevel] = useState(product?.stockNumber?.toString() || '');
+
     const [lowStockThreshold, setLowStockThreshold] = useState(product?.lowStockThreshold?.toString() || '');
 
-    const handleSubmit = (e: React.FormEvent) => {
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !category || !description || !price || !stockLevel || !lowStockThreshold) {
@@ -232,6 +269,7 @@ const ProductForm: React.FC<{
         }
 
         const productData = {
+            _id: '',
             name,
             category,
             description,
@@ -253,7 +291,7 @@ const ProductForm: React.FC<{
 
             try {
 
-                request({
+                const data = await request({
                     method: "POST",
                     url: '/product/addNewProduct',
                     data: productData,
@@ -261,7 +299,11 @@ const ProductForm: React.FC<{
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${Cookies.get('token')}`
                     }
-                })
+                });
+
+                if (!data) return;
+
+                productData._id = data._id;
 
                 addProduct(productData);
 

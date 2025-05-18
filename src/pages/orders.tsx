@@ -375,7 +375,7 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         if (!currentUser) return;
 
         const orderItems = Object.entries(selectedProducts).map(([productId, quantity]) => {
-            const product = products.find(p => p.id === productId);
+            const product = products.find(p => p._id === productId);
             if (!product) throw new Error(`Product not found: ${productId}`);
 
             return {
@@ -410,7 +410,7 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     };
 
     const totalAmount = Object.entries(selectedProducts).reduce((sum, [productId, quantity]) => {
-        const product = products.find(p => p.id === productId);
+        const product = products.find(p => p._id === productId);
         return sum + (product?.price || 0) * quantity;
     }, 0);
 
@@ -418,28 +418,28 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="space-y-4">
             <div className="max-h-[400px] overflow-y-auto pr-2">
                 {products.map((product) => {
-                    const isSelected = !!selectedProducts[product.id];
+                    const isSelected = !!selectedProducts[product._id];
 
                     return (
                         <div
-                            key={product.id}
+                            key={product._id}
                             className="flex items-center justify-between border-b border-border py-3"
                         >
                             <div className="flex items-start gap-4">
                                 <Checkbox
-                                    id={`product-${product.id}`}
+                                    id={`product-${product._id}`}
                                     checked={isSelected}
                                     onCheckedChange={(checked) => {
                                         if (checked) {
-                                            handleQuantityChange(product.id, 1);
+                                            handleQuantityChange(product._id, 1);
                                         } else {
-                                            handleQuantityChange(product.id, 0);
+                                            handleQuantityChange(product._id, 0);
                                         }
                                     }}
                                 />
                                 <div>
                                     <label
-                                        htmlFor={`product-${product.id}`}
+                                        htmlFor={`product-${product._id}`}
                                         className="font-medium cursor-pointer"
                                     >
                                         {product.name}
@@ -455,21 +455,21 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleQuantityChange(
-                                            product.id,
-                                            Math.max(1, (selectedProducts[product.id] || 0) - 1)
+                                            product._id,
+                                            Math.max(1, (selectedProducts[product._id] || 0) - 1)
                                         )}
                                     >
                                         -
                                     </Button>
                                     <span className="px-3 min-w-[40px] text-center">
-                                        {selectedProducts[product.id]}
+                                        {selectedProducts[product._id]}
                                     </span>
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleQuantityChange(
-                                            product.id,
-                                            (selectedProducts[product.id] || 0) + 1
+                                            product._id,
+                                            (selectedProducts[product._id] || 0) + 1
                                         )}
                                     >
                                         +
