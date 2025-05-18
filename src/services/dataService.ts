@@ -23,10 +23,20 @@ const useDataStore = () => {
         return newProduct;
     };
 
-    const updateProduct = (product: Product) => {
-        setProducts(products.map((p) => (p.id === product.id ? product : p)));
-        return product;
+    const updateProduct = async (product: Product) => {
+        try {
+
+
+            setProducts(products.map((p) => (p.id === product.id ? product : p)));
+
+            return product;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.log(error.message);
+        }
     };
+
 
     const deleteProduct = (id: string) => {
         setProducts(products.filter((p) => p.id !== id));
