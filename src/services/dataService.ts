@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { SetStateAction, useState } from 'react';
 import { Product, Order, User, OrderItem, DeliveryUpdate, StockTransaction } from '../types';
 import { products as mockProducts, orders as mockOrders, users as mockUsers, deliveryUpdates as mockDeliveryUpdates } from './mockData';
 
@@ -15,19 +15,23 @@ const useDataStore = () => {
     // Product Operations
     const getProducts = () => products;
 
-    const getProduct = (id: string) => products.find((p) => p.id === id);
+    const getProduct = (id: string) => products.find((p) => p._id === id);
 
-    const addProduct = (product: Omit<Product, 'id'>) => {
-        const newProduct = { ...product, id: `${products.length + 1}` };
-        setProducts([...products, newProduct as Product]);
-        return newProduct;
+    const setAllProduct = (products: SetStateAction<Product[]>) => {
+        setProducts(products);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const addProduct = (product: any) => {
+        setProducts([...products, product as Product]);
+        return product;
     };
 
     const updateProduct = async (product: Product) => {
         try {
 
 
-            setProducts(products.map((p) => (p.id === product.id ? product : p)));
+            setProducts(products.map((p) => (p._id === product._id ? product : p)));
 
             return product;
 
@@ -39,11 +43,11 @@ const useDataStore = () => {
 
 
     const deleteProduct = (id: string) => {
-        setProducts(products.filter((p) => p.id !== id));
+        setProducts(products.filter((p) => p._id !== id));
     };
 
     const getLowStockProducts = () => {
-        return products.filter((p) => p.stockLevel <= p.lowStockThreshold);
+        return products.filter((p) => p.stockNumber <= p.lowStockThreshold);
     };
 
     // Order Operations
@@ -89,11 +93,11 @@ const useDataStore = () => {
 
         // Update stock levels
         orderItems.forEach((item) => {
-            const product = products.find((p) => p.id === item.productId);
+            const product = products.find((p) => p._id === item.productId);
             if (product) {
                 const updatedProduct = {
                     ...product,
-                    stockLevel: product.stockLevel - item.quantity,
+                    stockLevel: product.stockNumber - item.quantity,
                 };
                 updateProduct(updatedProduct);
 
@@ -195,11 +199,11 @@ const useDataStore = () => {
         setStockTransactions([...stockTransactions, newTransaction]);
 
         // Update product stock level
-        const product = products.find((p) => p.id === transaction.productId);
+        const product = products.find((p) => p._id === transaction.productId);
         if (product) {
             const updatedStockLevel = transaction.type === 'in'
-                ? product.stockLevel + transaction.quantity
-                : product.stockLevel - transaction.quantity;
+                ? product.stockNumber + transaction.quantity
+                : product.stockNumber - transaction.quantity;
 
             updateProduct({
                 ...product,
@@ -218,6 +222,7 @@ const useDataStore = () => {
         updateProduct,
         deleteProduct,
         getLowStockProducts,
+        setAllProduct,
 
         // Order operations
         getOrders,

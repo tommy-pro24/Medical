@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { removeCookies } from '@/lib/userinfo';
 
 export default function List() {
@@ -13,6 +13,7 @@ export default function List() {
     const [inventoryOpen, setInventoryOpen] = useState(false);
 
     const pathname = usePathname();
+    const router = useRouter();
 
     const handleLogout = () => {
         removeCookies();
@@ -32,7 +33,10 @@ export default function List() {
                         </Link>
                         <div className="space-y-1">
                             <button
-                                onClick={() => setInventoryOpen(!inventoryOpen)}
+                                onClick={() => {
+                                    setInventoryOpen(!inventoryOpen);
+                                    router.push('/inventory');
+                                }}
                                 className="flex items-center justify-between w-full px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200"
                             >
                                 <div className="flex items-center">
@@ -101,7 +105,10 @@ export default function List() {
                             </Link>
                             <div className="space-y-1">
                                 <button
-                                    onClick={() => setInventoryOpen(!inventoryOpen)}
+                                    onClick={() => {
+                                        setInventoryOpen(!inventoryOpen);
+                                        router.push('/inventory');
+                                    }}
                                     className="flex items-center justify-between w-full px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200"
                                 >
                                     <div className="flex items-center">
