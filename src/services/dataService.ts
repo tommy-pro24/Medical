@@ -27,7 +27,8 @@ const useDataStore = () => {
         return product;
     };
 
-    const updateProduct = async (product: Product) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateProduct = async (product: any) => {
         try {
 
 
@@ -207,7 +208,7 @@ const useDataStore = () => {
 
             updateProduct({
                 ...product,
-                stockLevel: updatedStockLevel,
+                stockNumber: updatedStockLevel,
             });
         }
 

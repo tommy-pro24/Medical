@@ -269,14 +269,24 @@ const ProductForm: React.FC<{
         }
 
         const productData = {
-            _id: '',
+            _id: product?._id,
             name,
             category,
             description,
             price: parseFloat(price),
-            stockLevel: parseInt(stockLevel),
+            stockNumber: parseInt(stockLevel),
             lowStockThreshold: parseInt(lowStockThreshold)
         };
+
+        request({
+            method: "POST",
+            url: '/product/updateProduct',
+            data: productData,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Cookies.get('token')}`
+            }
+        })
 
         if (product) {
             updateProduct({
