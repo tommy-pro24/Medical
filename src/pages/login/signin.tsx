@@ -4,15 +4,66 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from '@/hooks/use-toast';
+import { request } from '@/lib/request';
+import { storeUserInfo } from '@/lib/userinfo';
+import { useRouter } from 'next/router';
 
 export default function Signin() {
+
     const [showPassword, setShowPassword] = useState(false);
+
     const [email, setEmail] = useState('');
+
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Sign in:', { email, password });
+
+        if (!email || !password) {
+            toast({
+                title: "Error",
+                description: "All fields are required",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+
+            const response = await request({
+                method: "POST",
+                url: '/auth/login',
+                data: {
+                    email: email.trim(),
+                    password: password.trim()
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }, {
+                successMessage: "Signin successful!",
+                errorMessage: "Signin failed. Please try again.",
+                showToast: true
+            })
+
+            if (response) {
+
+                storeUserInfo(response);
+
+                router.push('/');
+
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+
+            console.log(error.errorMessage);
+
+        }
+
     };
 
     const containerVariants = {
