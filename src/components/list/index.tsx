@@ -5,6 +5,8 @@ import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LogOut, Layout
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
+
+
 export default function List() {
 
     const [open, setOpen] = useState(false);
@@ -14,10 +16,15 @@ export default function List() {
     const { logout } = useData();
 
     const pathname = usePathname();
+
     const router = useRouter();
 
     const handleLogout = () => {
+
         logout();
+
+        router.push('/login/siginin');
+
     };
 
     const isActive = (path: string) => pathname === path;
