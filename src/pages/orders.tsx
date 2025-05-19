@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import React, { useEffect, useState } from 'react';
 import { useData } from '@/context/DataContext';
+import { useWebSocketContext } from '@/context/WebSocketContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
-import { useWebSocket } from '@/hooks/useWebSocket';
 
 const ORDER_STEPS = [
     { key: 'pending', label: 'Pending', icon: <Check className="h-4 w-4" /> },
@@ -32,8 +32,8 @@ export default function OrdersPage() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-    const { sendMessage, isConnected, lastMessage } = useWebSocket('http://localhost:5000');
-    const [orders, setOrders] = useState<Order[]>([]);;
+    const { sendMessage, lastMessage } = useWebSocketContext();
+    const [orders, setOrders] = useState<Order[]>([]);
 
     useEffect(() => {
         onLoad();
@@ -56,14 +56,6 @@ export default function OrdersPage() {
             }
         }
     }, [lastMessage]);
-
-    useEffect(() => {
-        if (!isConnected) {
-            console.log('WebSocket disconnected, attempting to reconnect...');
-        } else {
-            console.log('WebSocket connected successfully');
-        }
-    }, [isConnected]);
 
     const onLoad = async () => {
         sendMessage({
