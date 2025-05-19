@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useData } from '@/context/DataContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 const ORDER_STEPS = [
     { key: 'pending', label: 'Pending', icon: <Check className="h-4 w-4" /> },
@@ -31,9 +32,50 @@ export default function OrdersPage() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+    const { sendMessage, isConnected, lastMessage } = useWebSocket('http://localhost:5000');
+    const [orders, setOrders] = useState<Order[]>([]);;
+
+    useEffect(() => {
+        onLoad();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    useEffect(() => {
+        if (lastMessage) {
+            if (lastMessage.type === 'GET_ORDERS_RESPONSE') {
+
+                setOrders(lastMessage?.payload?.orders);
+
+            } else if (lastMessage.type === 'GET_ORDERS_ERROR') {
+
+                toast({
+                    title: "Get orders error",
+                    description: ""
+                })
+
+            }
+        }
+    }, [lastMessage]);
+
+    useEffect(() => {
+        if (!isConnected) {
+            console.log('WebSocket disconnected, attempting to reconnect...');
+        } else {
+            console.log('WebSocket connected successfully');
+        }
+    }, [isConnected]);
+
+    const onLoad = async () => {
+        sendMessage({
+            type: "GET_ORDERS",
+            payload: {
+                token: getCurrentUser()?.token
+            },
+            timestamp: Date.now(),
+        })
+    }
 
     const currentUser = getCurrentUser();
-    const orders = getOrders();
 
     // If client is logged in, filter orders to only show their orders
     const filteredOrders = currentUser?.role === 'client'
@@ -199,9 +241,9 @@ export default function OrdersPage() {
 
                                         <div className="flex items-center justify-between">
                                             <span className="text-muted-foreground">Invoice Status</span>
-                                            <span className="font-medium">
+                                            {/* <span className="font-medium">
                                                 {selectedOrder.invoiceStatus.replace('-', ' ')}
-                                            </span>
+                                            </span> */}
                                         </div>
 
                                         <div className="flex items-center justify-between">
@@ -216,14 +258,14 @@ export default function OrdersPage() {
                                             </div>
                                         )}
 
-                                        {selectedOrder.estimatedDeliveryTime && (
+                                        {/* {selectedOrder.estimatedDeliveryTime && (
                                             <div className="flex items-center justify-between">
                                                 <span className="text-muted-foreground">Est. Delivery</span>
                                                 <span className="font-medium">
                                                     {new Date(selectedOrder.estimatedDeliveryTime).toLocaleDateString('en-GB')}
                                                 </span>
                                             </div>
-                                        )}
+                                        )} */}
 
                                         <div className="flex items-center justify-between border-t border-border pt-3 mt-3">
                                             <span className="text-muted-foreground">Total Amount</span>

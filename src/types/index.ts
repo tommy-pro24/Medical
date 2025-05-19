@@ -4,6 +4,7 @@ export interface User {
     name: string;
     email: string;
     role: 'admin' | 'warehouse' | 'client' | 'logistics';
+    token: string;
 }
 
 export interface Product {
@@ -24,10 +25,8 @@ export interface Order {
     orderDate: Date;
     status: 'pending' | 'confirmed' | 'dispatched' | 'in-transit' | 'cancelled';
     items: OrderItem[];
-    invoiceStatus: 'draft' | 'proforma-sent' | 'invoice-confirmed' | 'paid';
     deliveryAgent?: string;
     deliveryDate?: Date;
-    estimatedDeliveryTime?: Date;
     totalAmount: number;
 }
 

@@ -4,22 +4,25 @@ import { DateRangePicker } from "@/components/ui/date-range-picker"
 import TotalBox from "@/components/dashboard/totalBox";
 import DashboardBarChart from "@/components/dashboard/DashboardBarChart";
 import { useEffect } from "react";
-import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import { useData } from "@/context/DataContext";
 
 export default function Home() {
 
   const router = useRouter();
 
+  const { getCurrentUser } = useData();
+
   useEffect(() => {
 
-    if (!Cookies.get('_id')) {
+    if (!getCurrentUser()) {
 
       router.push('/login/signin');
 
     }
 
-  }, [router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <main className="m-0 px-4 sm:px-8 md:px-12 lg:px-20 bg-[#0f1729] w-full flex flex-col gap-5 min-h-screen text-white">
