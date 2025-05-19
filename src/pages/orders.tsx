@@ -71,7 +71,7 @@ export default function OrdersPage() {
 
     // If client is logged in, filter orders to only show their orders
     const filteredOrders = currentUser?.role === 'client'
-        ? orders.filter(o => o.clientId === currentUser.id)
+        ? orders.filter(o => o.clientId === currentUser._id)
         : orders;
 
     const searchedOrders = filteredOrders.filter(order =>
@@ -430,7 +430,7 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         }
 
         const newOrder = addOrder({
-            clientId: currentUser.id,
+            clientId: currentUser._id,
             clientName: currentUser.name,
             items: orderItems
         });

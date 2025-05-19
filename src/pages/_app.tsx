@@ -13,28 +13,26 @@ export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const isAuthPage = router.pathname === '/login/signin' || router.pathname === '/login/signup'
 
-  if (isAuthPage) {
-    return (
-      <>
-        <Component {...pageProps} />
-        <Toaster />
-      </>
-    )
-  }
-
   return (
     <WebSocketProvider>
       <DataProvider>
-        <div className="min-h-screen bg-gradient-to-br from-[#101624] via-[#111827] to-[#181f2a]">
-          <Navbar />
-          <div className="flex">
-            <List />
-            <main className="flex-1 min-h-screen flex flex-col items-center">
-              <Component {...pageProps} />
-            </main>
+        {isAuthPage ? (
+          <>
+            <Component {...pageProps} />
+            <Toaster />
+          </>
+        ) : (
+          <div className="min-h-screen bg-gradient-to-br from-[#101624] via-[#111827] to-[#181f2a]">
+            <Navbar />
+            <div className="flex">
+              <List />
+              <main className="flex-1 min-h-screen flex flex-col items-center">
+                <Component {...pageProps} />
+              </main>
+            </div>
+            <Foot />
           </div>
-          <Foot />
-        </div>
+        )}
         <Toaster />
       </DataProvider>
     </WebSocketProvider>

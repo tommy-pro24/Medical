@@ -75,7 +75,6 @@ const useDataStore = () => {
             orderDate: new Date(),
             status: 'pending',
             items: orderItems,
-            invoiceStatus: 'draft',
             totalAmount,
         };
 
@@ -136,28 +135,32 @@ const useDataStore = () => {
         setDeliveryUpdates([...deliveryUpdates, newDeliveryUpdate]);
     };
 
-    const updateInvoiceStatus = (id: string, invoiceStatus: Order['invoiceStatus']) => {
-        setOrders(
-            orders.map((o) => (o.id === id ? { ...o, invoiceStatus } : o))
-        );
-    };
+    // const updateInvoiceStatus = (id: string, invoiceStatus: Order['invoiceStatus']) => {
+    //     setOrders(
+    //         orders.map((o) => (o.id === id ? { ...o, invoiceStatus } : o))
+    //     );
+    // };
 
     // User Operations
     const getUsers = () => users;
 
-    const getUser = (id: string) => users.find((u) => u.id === id);
+    const getUser = (id: string) => users.find((u) => u._id === id);
 
-    const login = (email: string) => {
-        const user = users.find((u) => u.email === email);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const login = (user: any) => {
+
         if (user) {
             setCurrentUser(user);
             return user;
         }
+
         return null;
     };
 
     const logout = () => {
+
         setCurrentUser(null);
+
     };
 
     const getCurrentUser = () => currentUser;
@@ -230,7 +233,7 @@ const useDataStore = () => {
         getOrder,
         addOrder,
         updateOrderStatus,
-        updateInvoiceStatus,
+        // updateInvoiceStatus,
 
         // User operations
         getUsers,

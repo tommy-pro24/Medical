@@ -2,12 +2,7 @@
 import { Product, Order, User, DeliveryUpdate } from '../types';
 
 // Mock Users
-export const users: User[] = [
-    { id: '1', name: 'Admin User', email: 'admin@ssb.com', role: 'admin' },
-    { id: '2', name: 'Warehouse Manager', email: 'warehouse@ssb.com', role: 'warehouse' },
-    { id: '3', name: 'ABC Hospital', email: 'client@hospital.com', role: 'client' },
-    { id: '4', name: 'Logistics Coordinator', email: 'logistics@ssb.com', role: 'logistics' },
-];
+export const users: User[] = [];
 
 // Mock Products
 export const products: Product[] = [];
@@ -20,7 +15,6 @@ export const orders: Order[] = [
         clientName: 'ABC Hospital',
         orderDate: new Date('2023-11-15'),
         status: 'confirmed',
-        invoiceStatus: 'paid',
         items: [
             {
                 productId: '1',
@@ -47,7 +41,6 @@ export const orders: Order[] = [
         clientName: 'ABC Hospital',
         orderDate: new Date('2023-11-28'),
         status: 'in-transit',
-        invoiceStatus: 'invoice-confirmed',
         items: [
             {
                 productId: '2',
@@ -58,7 +51,6 @@ export const orders: Order[] = [
             }
         ],
         deliveryAgent: 'Maria Johnson',
-        estimatedDeliveryTime: new Date('2023-12-02'),
         totalAmount: 18000,
     },
     {
@@ -67,7 +59,6 @@ export const orders: Order[] = [
         clientName: 'ABC Hospital',
         orderDate: new Date('2023-11-30'),
         status: 'confirmed',
-        invoiceStatus: 'proforma-sent',
         items: [
             {
                 productId: '3',
