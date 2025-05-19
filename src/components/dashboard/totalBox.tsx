@@ -76,7 +76,7 @@ export default function TotalBox() {
             style: 3
         },
         {
-            title: "Pending",
+            title: "Pending1",
             value: "5",
             desc: "Completed deliveries",
             Icon: Orders,

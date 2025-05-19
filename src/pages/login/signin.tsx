@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { request } from '@/lib/request';
-import { storeUserInfo } from '@/lib/userinfo';
 import { useRouter } from 'next/router';
-
+import { useData } from '@/context/DataContext';
 export default function Signin() {
 
     const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +15,8 @@ export default function Signin() {
     const [email, setEmail] = useState('');
 
     const [password, setPassword] = useState('');
+
+    const { login } = useData();
 
     const router = useRouter();
 
@@ -51,7 +52,7 @@ export default function Signin() {
 
             if (response) {
 
-                storeUserInfo(response);
+                login(response);
 
                 router.push('/');
 

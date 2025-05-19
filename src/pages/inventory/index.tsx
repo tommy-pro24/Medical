@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { request } from "@/lib/request";
-import Cookies from "js-cookie";
 
 interface InventoryProps {
     initialProducts?: Product[];
@@ -16,7 +15,7 @@ interface InventoryProps {
 
 const Inventory = ({ initialProducts }: InventoryProps) => {
 
-    const { getProducts, updateProduct, setAllProduct } = useData();
+    const { getProducts, updateProduct, setAllProduct, getCurrentUser } = useData();
 
     const [search, setSearch] = useState('');
 
@@ -74,6 +73,13 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
 
         try {
 
+            if (newStock === 0) {
+                toast({
+                    title: "Stock info",
+                    description: `No stock number`,
+                });
+            }
+
             request({
                 method: 'POST',
                 url: "/product/updateStock",
@@ -83,7 +89,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                 },
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${Cookies.get('token')}`
+                    'Authorization': `Bearer ${getCurrentUser()?.token}`
                 }
             });
 
@@ -241,7 +247,7 @@ const ProductForm: React.FC<{
     onClose: () => void;
 }> = ({ product, onClose }) => {
 
-    const { addProduct, updateProduct } = useData();
+    const { addProduct, updateProduct, getCurrentUser } = useData();
 
     const [name, setName] = useState(product?.name || '');
 
@@ -284,7 +290,7 @@ const ProductForm: React.FC<{
             data: productData,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Cookies.get('token')}`
+                'Authorization': `Bearer ${getCurrentUser()?.token}`
             }
         })
 
@@ -307,7 +313,7 @@ const ProductForm: React.FC<{
                     data: productData,
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${Cookies.get('token')}`
+                        'Authorization': `Bearer ${getCurrentUser()?.token}`
                     }
                 });
 
