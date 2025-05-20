@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
 import Cookies from 'js-cookie';
-
+import { NotificationBadge } from "../ui/notification-badge";
 
 export default function List() {
 
@@ -14,7 +14,7 @@ export default function List() {
 
     const [inventoryOpen, setInventoryOpen] = useState(false);
 
-    const { logout, getNewOrders } = useData();
+    const { logout, getNewOrders, getCurrentUser, getProducts } = useData();
 
     const pathname = usePathname();
 
@@ -29,6 +29,20 @@ export default function List() {
     };
 
     const isActive = (path: string) => pathname === path;
+
+    const products = getProducts();
+
+    const getLowStockCount = (category?: string) => {
+        return products.filter(product =>
+            product.stockNumber <= product.lowStockThreshold &&
+            (!category || product.category === category)
+        ).length;
+    };
+
+    const totalLowStock = getLowStockCount();
+    const diagnosticLowStock = getLowStockCount('diagnostic');
+    const surgicalLowStock = getLowStockCount('surgical');
+    const consumableLowStock = getLowStockCount('consumable');
 
     return (
         <>
@@ -55,21 +69,41 @@ export default function List() {
                                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${inventoryOpen ? 'rotate-180' : ''}`} />
                             </button>
                             <div className={`space-y-1 overflow-hidden ml-3 transition-all duration-200 ${inventoryOpen ? 'max-h-48' : 'max-h-0'}`}>
-                                <Link href="/inventory" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
-                                    <Package className="w-5 h-5 mr-3" />
-                                    All
+                                <Link href="/inventory" className={`flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
+                                    <div className='flex'>
+                                        <Package className="w-5 h-5 mr-3" />
+                                        All
+                                    </div>
+                                    {getCurrentUser()?.role !== 'client' &&
+                                        <NotificationBadge count={totalLowStock} />
+                                    }
                                 </Link>
-                                <Link href="/inventory/diagnostic" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
-                                    <Stethoscope className="w-5 h-5 mr-3" />
-                                    Diagnostic
+                                <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
+                                    <div className='flex'>
+                                        <Stethoscope className="w-5 h-5 mr-3" />
+                                        Diagnostic
+                                    </div>
+                                    {getCurrentUser()?.role !== 'client' &&
+                                        <NotificationBadge count={diagnosticLowStock} />
+                                    }
                                 </Link>
-                                <Link href="/inventory/surgical" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
-                                    <Syringe className="w-5 h-5 mr-3" />
-                                    Surgical
+                                <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
+                                    <div className=' flex'>
+                                        <Syringe className="w-5 h-5 mr-3" />
+                                        Surgical
+                                    </div>
+                                    {getCurrentUser()?.role !== 'client' &&
+                                        <NotificationBadge count={surgicalLowStock} />
+                                    }
                                 </Link>
-                                <Link href="/inventory/consumable" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
-                                    <Package className="w-5 h-5 mr-3" />
-                                    Consumables
+                                <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
+                                    <div className='flex'>
+                                        <Package className="w-5 h-5 mr-3" />
+                                        Consumables
+                                    </div>
+                                    {getCurrentUser()?.role !== 'client' &&
+                                        <NotificationBadge count={consumableLowStock} />
+                                    }
                                 </Link>
                             </div>
                         </div>
@@ -79,9 +113,7 @@ export default function List() {
                                 Orders/Delivery
                             </div>
                             {Number(getNewOrders()) > 0 &&
-                                <span className="ml-auto bg-destructive text-destructive-foreground text-xs rounded-full px-2 py-0.5 flex items-center justify-center">
-                                    {getNewOrders()}
-                                </span>
+                                <NotificationBadge count={getNewOrders()} />
                             }
                         </Link>
                     </nav>
@@ -134,21 +166,41 @@ export default function List() {
                                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${inventoryOpen ? 'rotate-180' : ''}`} />
                                 </button>
                                 <div className={`space-y-1 ml-5 overflow-hidden transition-all duration-200 ${inventoryOpen ? 'max-h-48' : 'max-h-0'}`}>
-                                    <Link href="/inventory" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
-                                        <Package className="w-5 h-5 mr-3" />
-                                        All
+                                    <Link href="/inventory" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
+                                        <div className='flex'>
+                                            <Package className="w-5 h-5 mr-3" />
+                                            All
+                                        </div>
+                                        {getCurrentUser()?.role !== 'client' &&
+                                            <NotificationBadge count={totalLowStock} />
+                                        }
                                     </Link>
-                                    <Link href="/inventory/diagnostic" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
-                                        <Stethoscope className="w-5 h-5 mr-3" />
-                                        Diagnostic
+                                    <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
+                                        <div className='flex'>
+                                            <Stethoscope className="w-5 h-5 mr-3" />
+                                            Diagnostic
+                                        </div>
+                                        {getCurrentUser()?.role !== 'client' &&
+                                            <NotificationBadge count={diagnosticLowStock} />
+                                        }
                                     </Link>
-                                    <Link href="/inventory/surgical" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
-                                        <Syringe className="w-5 h-5 mr-3" />
-                                        Surgical
+                                    <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
+                                        <div className='flex'>
+                                            <Syringe className="w-5 h-5 mr-3" />
+                                            Surgical
+                                        </div>
+                                        {getCurrentUser()?.role !== 'client' &&
+                                            <NotificationBadge count={surgicalLowStock} />
+                                        }
                                     </Link>
-                                    <Link href="/inventory/consumable" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
-                                        <Package className="w-5 h-5 mr-3" />
-                                        Consumables
+                                    <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
+                                        <div className='flex'>
+                                            <Package className="w-5 h-5 mr-3" />
+                                            Consumables
+                                        </div>
+                                        {getCurrentUser()?.role !== 'client' &&
+                                            <NotificationBadge count={consumableLowStock} />
+                                        }
                                     </Link>
                                 </div>
                             </div>
@@ -158,9 +210,7 @@ export default function List() {
                                     Orders/Delivery
                                 </div>
                                 {Number(getNewOrders()) > 0 &&
-                                    <span className="ml-auto bg-destructive text-destructive-foreground text-xs rounded-full px-2 py-0.5 flex items-center justify-center">
-                                        {getNewOrders()}
-                                    </span>
+                                    <NotificationBadge count={getNewOrders()} />
                                 }
                             </Link>
                         </nav>

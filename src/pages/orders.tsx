@@ -90,7 +90,7 @@ export default function OrdersPage() {
 
     const searchedOrders = filteredOrders?.filter(order =>
         order?.id?.includes(search) ||
-        order?.clientName.toLowerCase().includes(search.toLowerCase())
+        order?.clientName.toLowerCase().includes(search.toLowerCase()) || order?.status.includes(search.toLowerCase())
     );
 
     const getStatusColor = (status: Order['status']) => {
