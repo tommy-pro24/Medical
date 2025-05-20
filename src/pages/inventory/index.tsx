@@ -140,12 +140,24 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             return;
         }
 
+        for (const [productId, quantity] of Object.entries(selectedProducts)) {
+            const product = products.find(p => p._id === productId);
+            if (product && quantity > product.stockNumber) {
+                toast({
+                    title: "Info",
+                    description: `Insufficient stock for "${product.name}". Available: ${product.stockNumber}`
+                })
+                return;
+            }
+        }
+
         sendMessage({
             type: "SET_NEW_ORDER",
             payload: {
                 products: Object.entries(selectedProducts).map(([productId, quantity]) => {
                     const product = products.find(p => p._id === productId);
                     return {
+                        productId: product?._id,
                         productName: product?.name || '',
                         quantity,
                         unitPrice: product?.price || 0,

@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import { useData } from '@/context/DataContext';
 import { request } from '@/lib/request';
 import { useWebSocketContext } from '@/context/WebSocketContext';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -11,7 +12,7 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
     const router = useRouter();
-    const { login, getCurrentUser, addOrder } = useData();
+    const { login, getCurrentUser, addOrder, setNewOrders, getNewOrders } = useData();
     const { lastMessage } = useWebSocketContext();
 
     useEffect(() => {
@@ -40,7 +41,12 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
                     });
 
                     if (response) {
-                        login(response);
+                        login(response.user);
+
+                        if (response.user?.role === 'admin') {
+                            setNewOrders(response?.count);
+
+                        }
                     } else {
                         // If profile fetch fails, redirect to login
                         router.push('/login/signin');
@@ -53,13 +59,23 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         };
 
         checkAuth();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router, login, getCurrentUser]);
 
     useEffect(() => {
         if (lastMessage) {
             if (lastMessage.type === 'NEW_ORDER') {
                 if ((getCurrentUser()?._id === lastMessage?.payload?.clientId) || (getCurrentUser()?.role === 'admin')) {
+
                     addOrder(lastMessage?.payload);
+                    if (getCurrentUser()?.role === 'admin') {
+                        setNewOrders(getNewOrders() + 1);
+                        toast({
+                            title: 'Order Created',
+                            description: `Neworder has been created successfully`
+                        });
+                    }
+
                 }
             }
         }
