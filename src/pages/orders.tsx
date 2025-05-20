@@ -14,6 +14,9 @@ import {
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { request } from '@/lib/request';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
+import { subDays } from 'date-fns';
 
 const ORDER_STEPS = [
     { key: 'pending', label: 'Pending', icon: <Check className="h-4 w-4" /> },
@@ -34,6 +37,10 @@ export default function OrdersPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
     const { lastMessage, sendMessage } = useWebSocketContext();
+    const [date, setDate] = React.useState<DateRange | undefined>({
+        from: subDays(new Date(), 7),
+        to: new Date(),
+    })
 
     useEffect(() => {
         if (lastMessage) {
@@ -49,17 +56,21 @@ export default function OrdersPage() {
     }, [lastMessage]);
 
     useEffect(() => {
-        if (getCurrentUser()) {
+        if (getCurrentUser() && date?.from && date?.to) {
             onLoad();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getCurrentUser()])
+    }, [getCurrentUser(), date])
 
     const onLoad = async () => {
 
         const response = await request({
             method: "POST",
             url: '/order/getAllOrders',
+            data: {
+                from: date?.from,
+                to: date?.to
+            },
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${getCurrentUser()?.token}`
@@ -77,7 +88,7 @@ export default function OrdersPage() {
         ? getOrders()?.filter(o => o.clientId === currentUser._id)
         : getOrders();
 
-    const searchedOrders = filteredOrders.filter(order =>
+    const searchedOrders = filteredOrders?.filter(order =>
         order?.id?.includes(search) ||
         order?.clientName.toLowerCase().includes(search.toLowerCase())
     );
@@ -149,9 +160,10 @@ export default function OrdersPage() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+                <DateRangePicker setDate={setDate} date={date} />
             </div>
             <div className="flex flex-col gap-4">
-                {searchedOrders.map(order => {
+                {searchedOrders?.map(order => {
                     // Progress step logic
                     const currentIdx = ORDER_STEPS.findIndex(s => s.key === order.status);
                     return (
@@ -211,7 +223,7 @@ export default function OrdersPage() {
                     );
                 })}
 
-                {searchedOrders.length === 0 && (
+                {searchedOrders?.length === 0 && (
                     <div className="text-center py-10 text-muted-foreground">
                         No orders found. {currentUser?.role === 'client' && "Create a new order to get started."}
                     </div>
