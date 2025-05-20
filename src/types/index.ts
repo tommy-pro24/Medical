@@ -4,7 +4,7 @@ export interface User {
     name: string;
     email: string;
     phone: string;
-    role: 'admin' | 'warehouse' | 'client' | 'logistics';
+    role: 'admin' | 'warehouse' | 'client';
     token: string;
 }
 

@@ -42,11 +42,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
 
                     if (response) {
                         login(response.user);
-
-                        if (response.user?.role === 'admin') {
-                            setNewOrders(response?.count);
-
-                        }
+                        setNewOrders(response?.count);
                     } else {
                         // If profile fetch fails, redirect to login
                         router.push('/login/signin');
@@ -62,26 +58,46 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router, login, getCurrentUser]);
 
+    const newOrder = () => {
+        if ((getCurrentUser()?._id === lastMessage?.payload?.clientId) || (getCurrentUser()?.role !== 'client')) {
+
+            addOrder(lastMessage?.payload);
+
+            if (getCurrentUser()?.role === 'admin') {
+                setNewOrders(getNewOrders() + 1);
+                toast({
+                    title: 'Order Created',
+                    description: `Neworder has been created successfully`
+                });
+            }
+
+        }
+    }
+
+    const setDispatch = () => {
+        if ((getCurrentUser()?._id === lastMessage?.payload?.id) || (getCurrentUser()?.role !== 'client')) {
+
+            updateOrderStatus(lastMessage?.payload?.orderId, lastMessage?.payload?.newStatus);
+
+            if (lastMessage?.payload?.newStatus === 'dispatched') {
+                if (getCurrentUser()?.role === 'admin') {
+                    setNewOrders(getNewOrders() - 1);
+                } else {
+                    setNewOrders(getNewOrders() + 1);
+                }
+            } else if (lastMessage?.payload?.newStatus === 'in-transit') {
+                setNewOrders(getNewOrders() - 1);
+            }
+
+
+
+        }
+    }
+
     useEffect(() => {
         if (lastMessage) {
-            if (lastMessage.type === 'NEW_ORDER') {
-                if ((getCurrentUser()?._id === lastMessage?.payload?.clientId) || (getCurrentUser()?.role === 'admin')) {
-
-                    addOrder(lastMessage?.payload);
-                    if (getCurrentUser()?.role === 'admin') {
-                        setNewOrders(getNewOrders() + 1);
-                        toast({
-                            title: 'Order Created',
-                            description: `Neworder has been created successfully`
-                        });
-                    }
-
-                }
-            } else if (lastMessage.type === "SET_DISPATCHED") {
-                if ((getCurrentUser()?._id === lastMessage?.payload?.id) || (getCurrentUser()?.role !== 'client')) {
-                    updateOrderStatus(lastMessage?.payload?.orderId, lastMessage?.payload?.newStatus);
-                }
-            }
+            if (lastMessage.type === 'NEW_ORDER') newOrder();
+            else if (lastMessage.type === "SET_DISPATCHED") setDispatch()
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
