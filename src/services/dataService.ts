@@ -1,7 +1,7 @@
 
 import { SetStateAction, useState } from 'react';
-import { Product, Order, User, DeliveryUpdate, StockTransaction } from '../types';
-import { products as mockProducts, orders as mockOrders, users as mockUsers, deliveryUpdates as mockDeliveryUpdates } from './mockData';
+import { Product, Order, User, DeliveryUpdate, StockTransaction, InventoryHistory } from '../types';
+import { products as mockProducts, orders as mockOrders, users as mockUsers, deliveryUpdates as mockDeliveryUpdates, inventoryHistory as mockInventoryHistory } from './mockData';
 
 // Create a simple in-memory data store
 const useDataStore = () => {
@@ -11,6 +11,7 @@ const useDataStore = () => {
     const [deliveryUpdates, setDeliveryUpdates] = useState<DeliveryUpdate[]>(mockDeliveryUpdates);
     const [stockTransactions, setStockTransactions] = useState<StockTransaction[]>([]);
     const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]); // Default to admin for demo
+    const [inventoryHistory, setInventoryHistory] = useState<InventoryHistory[]>(mockInventoryHistory);
     const [newOrders, setNewOrders] = useState(0);
 
     // Product Operations
@@ -24,8 +25,11 @@ const useDataStore = () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const addProduct = (product: any) => {
+
         setProducts([...products, product as Product]);
+
         return product;
+
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,7 +37,32 @@ const useDataStore = () => {
         try {
 
 
-            setProducts(products.map((p) => (p._id === product._id ? product : p)));
+            const oldProduct = products.find(p => p._id === product.id);
+            setProducts(products.map((p) => (p._id === product.id ? product : p)));
+
+            // Track product update in history
+            if (oldProduct) {
+                const historyEntry: InventoryHistory = {
+                    id: `${inventoryHistory.length + 1}`,
+                    productId: product.id,
+                    productName: product.name,
+                    actionType: 'update',
+                    timestamp: new Date(),
+                    userId: currentUser?._id || 'system',
+                    userName: currentUser?.name || 'System',
+                    details: {
+                        oldValue: {
+                            stockLevel: oldProduct.stockNumber,
+                            price: oldProduct.price
+                        },
+                        newValue: {
+                            stockLevel: product.stockNumber,
+                            price: product.price
+                        }
+                    }
+                };
+                setInventoryHistory([...inventoryHistory, historyEntry]);
+            }
 
             return product;
 
@@ -45,12 +74,36 @@ const useDataStore = () => {
 
 
     const deleteProduct = (id: string) => {
+        const productToDelete = products.find(p => p._id === id);
         setProducts(products.filter((p) => p._id !== id));
+
+        // Track product deletion in history
+        if (productToDelete) {
+            const historyEntry: InventoryHistory = {
+                id: `${inventoryHistory.length + 1}`,
+                productId: id,
+                productName: productToDelete.name,
+                actionType: 'delete',
+                timestamp: new Date(),
+                userId: currentUser?._id || 'system',
+                userName: currentUser?.name || 'System',
+                details: {
+                    oldValue: {
+                        stockLevel: productToDelete.stockNumber,
+                        price: productToDelete.price
+                    }
+                }
+            };
+            setInventoryHistory([...inventoryHistory, historyEntry]);
+        }
     };
 
     const getLowStockProducts = () => {
         return products.filter((p) => p.stockNumber <= p.lowStockThreshold);
     };
+
+    // Inventory History
+    const getInventoryHistory = () => inventoryHistory;
 
     // Order Operations
     const getOrders = () => orders;
@@ -171,14 +224,35 @@ const useDataStore = () => {
         // Update product stock level
         const product = products.find((p) => p._id === transaction.productId);
         if (product) {
+            const oldStockLevel = product.stockNumber;
             const updatedStockLevel = transaction.type === 'in'
                 ? product.stockNumber + transaction.quantity
                 : product.stockNumber - transaction.quantity;
 
-            updateProduct({
+            const updatedProduct = {
                 ...product,
                 stockNumber: updatedStockLevel,
-            });
+            };
+
+            updateProduct(updatedProduct);
+
+            // Add inventory history for stock transaction
+            const historyEntry: InventoryHistory = {
+                id: `${inventoryHistory.length + 1}`,
+                productId: product._id,
+                productName: product.name,
+                actionType: transaction.type === 'in' ? 'stock-in' : 'stock-out',
+                timestamp: new Date(),
+                userId: currentUser?._id || 'system',
+                userName: currentUser?.name || 'System',
+                details: {
+                    oldValue: { stockLevel: oldStockLevel },
+                    newValue: { stockLevel: updatedStockLevel },
+                    quantity: transaction.quantity,
+                    reference: transaction.reference
+                }
+            };
+            setInventoryHistory([...inventoryHistory, historyEntry]);
         }
 
         return newTransaction;
@@ -203,6 +277,9 @@ const useDataStore = () => {
         setAllOrders,
         updateOrderStatus,
         // updateInvoiceStatus,
+
+        // Inventory history
+        getInventoryHistory,
 
         // User operations
         getUsers,
