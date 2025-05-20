@@ -1,26 +1,30 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Package, Search, Plus, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Search, Plus, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { Product } from "@/types";
 import { useData } from "@/context/DataContext";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { request } from "@/lib/request";
+import ProductItem from "@/components/inventory/product";
+import { useWebSocketContext } from "@/context/WebSocketContext";
+import NewOrder from "@/components/inventory/newOrder";
 
 interface InventoryProps {
     initialProducts?: Product[];
 }
 
 const Inventory = ({ initialProducts }: InventoryProps) => {
-    const { getProducts, updateProduct, setAllProduct, getCurrentUser, addOrder } = useData();
+    const { getProducts, updateProduct, setAllProduct, getCurrentUser } = useData();
     const [search, setSearch] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
     const [productCounts, setProductCounts] = useState<Record<string, number>>({});
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedProducts, setSelectedProducts] = useState<Record<string, number>>({});
+
+    const { sendMessage } = useWebSocketContext();
 
     const allProducts = getProducts();
     const products = initialProducts || allProducts;
@@ -125,7 +129,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
         setSelectedProducts(prev => ({ ...prev, [productId]: quantity }));
     };
 
-    const handlePlaceOrder = () => {
+    const handlePlaceOrder = async () => {
         if (!currentUser) return;
         if (selectedProducts.length === 0) {
             toast({
@@ -135,25 +139,41 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             });
             return;
         }
-        const newOrder = addOrder({
-            clientId: currentUser._id,
-            clientName: currentUser.name,
-            items: Object.entries(selectedProducts).map(([productId, quantity]) => ({
-                productId,
-                productName: products.find(p => p._id === productId)?.name || '',
-                quantity,
-                unitPrice: products.find(p => p._id === productId)?.price || 0
-            }))
-        });
+
+        sendMessage({
+            type: "SET_NEW_ORDER",
+            payload: {
+                products: Object.entries(selectedProducts).map(([productId, quantity]) => {
+                    const product = products.find(p => p._id === productId);
+                    return {
+                        productName: product?.name || '',
+                        quantity,
+                        unitPrice: product?.price || 0,
+                    };
+                }),
+                token: getCurrentUser()?.token
+            },
+            timestamp: Date.now(),
+        })
+
         toast({
             title: 'Order Created',
-            description: `Your order #${newOrder.id} has been created successfully`
+            description: `Your order has been created successfully`
         });
+
         setSelectedProducts({});
+
         setOrderDialogOpen(false);
     };
 
     const totalOrderAmount = Object.entries(selectedProducts).reduce((sum, [productId, quantity]) => sum + (products.find(p => p._id === productId)?.price || 0) * quantity, 0);
+
+    const totalOrderCount = Object.entries(selectedProducts).reduce(
+        (sum, [, quantity]) => sum + quantity,
+        0
+    );
+
+    const totalOrderType = Object.entries(selectedProducts).length;
 
     return (
         <div className="space-y-6 w-full py-4 px-4 sm:px-6 md:px-10">
@@ -193,165 +213,36 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                 {filteredProducts.map(product => {
                     const isSelected = !!selectedProducts[product._id];
                     return (
-                        <Card
+                        // eslint-disable-next-line react/jsx-key
+                        <ProductItem
                             key={product._id}
-                            className={`overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-blue-500 ring-2 ring-blue-400' : product.stockNumber <= product.lowStockThreshold ? 'border-amber-500/50' : 'border-input'}`}
-                            onClick={() => currentUser?.role === 'client' && handleSelectProduct(product._id)}
-                        >
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        {product.name}
-                                        {isSelected && (
-                                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500" title="Selected"></span>
-                                        )}
-                                    </CardTitle>
-                                    {product.stockNumber <= product.lowStockThreshold && (
-                                        <AlertTriangle className="h-5 w-5 text-amber-500" />
-                                    )}
-                                </div>
-                                <div className="text-sm text-muted-foreground capitalize">{product.category}</div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Package className="h-5 w-5 text-muted-foreground" />
-                                        <span>Stock Level:</span>
-                                    </div>
-                                    <div
-                                        className={`font-medium ${product.stockNumber <= product.lowStockThreshold ? 'text-amber-500' : 'text-foreground'}`}
-                                    >
-                                        {product.stockNumber} units
-                                    </div>
-                                </div>
-                                <div className="text-sm">{product.description}</div>
-                                <div className="pt-2 flex justify-between gap-2">
-                                    {/* For client: show quantity input only if selected, no Add to Order button */}
-                                    {currentUser?.role === 'client' ? (
-                                        <Input
-                                            type="number"
-                                            value={selectedProducts[product._id] || ''}
-                                            onChange={e => handleProductQuantityChange(product._id, Number(e.target.value))}
-                                            placeholder="Qty"
-                                            min="1"
-                                            disabled={!isSelected}
-                                            onClick={e => e.stopPropagation()}
-                                            className={isSelected ? '' : 'opacity-50'}
-                                        />
-                                    ) : (
-                                        <>
-                                            <Input
-                                                type="number"
-                                                value={productCounts[product._id] || 0}
-                                                onChange={(e) => setProductCounts(prev => ({
-                                                    ...prev,
-                                                    [product._id]: Number(e.target.value)
-                                                }))}
-                                                placeholder="Enter quantity"
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => handleUpdateStock(product._id, product.stockNumber + (productCounts[product._id] || 0))}
-                                                className="flex-1"
-                                            >
-                                                Add
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-                                {/* Only show Edit Product for non-client */}
-                                {currentUser?.role !== 'client' && (
-                                    <div className="pt-2">
-                                        <Button
-                                            variant="secondary"
-                                            className="w-full"
-                                            onClick={() => handleEditProduct(product)}
-                                        >
-                                            Edit Product
-                                        </Button>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                            product={product}
+                            isSelected={isSelected}
+                            currentUser={currentUser}
+                            handleSelectProduct={handleSelectProduct}
+                            selectedProducts={selectedProducts}
+                            productCounts={productCounts}
+                            setProductCounts={setProductCounts}
+                            handleUpdateStock={handleUpdateStock}
+                            handleProductQuantityChange={handleProductQuantityChange}
+                            handleEditProduct={handleEditProduct}
+                        />
                     );
                 })}
             </div>
-            {/* Order Confirmation Dialog for client */}
             {currentUser?.role === 'client' && (
-                <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
-                    <DialogContent className="max-w-3xl">
-                        <DialogHeader>
-                            <DialogTitle>Order Summary</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <div className="max-h-[400px] overflow-y-auto pr-2">
-                                {Object.entries(selectedProducts).map(([productId, quantity]) => {
-                                    const product = products.find(p => p._id === productId);
-                                    return product ? (
-                                        <div
-                                            key={productId}
-                                            className="flex items-center justify-between border-b border-border py-3"
-                                        >
-                                            <div>
-                                                <div className="font-medium">{product.name}</div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    Unit Price: ₹{product.price.toLocaleString()}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleProductQuantityChange(productId, Math.max(1, quantity - 1));
-                                                        }}
-                                                    >
-                                                        -
-                                                    </Button>
-                                                    <span className="px-3 min-w-[40px] text-center">
-                                                        {quantity}
-                                                    </span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleProductQuantityChange(productId, quantity + 1);
-                                                        }}
-                                                    >
-                                                        +
-                                                    </Button>
-                                                </div>
-                                                <div className="font-medium">
-                                                    ₹{(product.price * quantity).toLocaleString()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })}
-                            </div>
-                            <div className="border-t border-border pt-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="font-medium">Total Amount</span>
-                                    <span className="font-medium text-lg">₹{totalOrderAmount.toLocaleString()}</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-end gap-3">
-                                <Button variant="outline" onClick={() => setOrderDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button onClick={handlePlaceOrder} disabled={Object.keys(selectedProducts).length === 0}>
-                                    <ShoppingCart className="h-4 w-4 mr-2" />
-                                    Place Order
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                <NewOrder
+                    orderDialogOpen={orderDialogOpen}
+                    setOrderDialogOpen={setOrderDialogOpen}
+                    selectedProducts={selectedProducts}
+                    products={products}
+                    handleProductQuantityChange={handleProductQuantityChange}
+                    totalOrderAmount={totalOrderAmount}
+                    totalOrderCount={totalOrderCount}
+                    totalOrderType={totalOrderType}
+                    handlePlaceOrder={handlePlaceOrder}
+                />
             )}
-            {/* Product Form Dialog for non-client */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
                     <DialogHeader>

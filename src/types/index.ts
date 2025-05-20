@@ -36,7 +36,6 @@ export interface OrderItem {
     productName: string;
     quantity: number;
     unitPrice: number;
-    totalPrice: number;
 }
 
 export interface StockTransaction {
