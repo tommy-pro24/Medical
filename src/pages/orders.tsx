@@ -431,19 +431,6 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             });
             return;
         }
-
-        // const newOrder = addOrder({
-        //     clientId: currentUser._id,
-        //     clientName: currentUser.name,
-        //     items: orderItems,
-        //     orderDate: new Date(),
-        // });
-
-        // toast({
-        //     title: 'Order Created',
-        //     description: `Your order #${newOrder.id} has been created successfully`
-        // });
-
         onClose();
     };
 

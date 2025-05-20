@@ -11,6 +11,7 @@ const useDataStore = () => {
     const [deliveryUpdates, setDeliveryUpdates] = useState<DeliveryUpdate[]>(mockDeliveryUpdates);
     const [stockTransactions, setStockTransactions] = useState<StockTransaction[]>([]);
     const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]); // Default to admin for demo
+    const [newOrders, setNewOrders] = useState(0);
 
     // Product Operations
     const getProducts = () => products;
@@ -60,6 +61,8 @@ const useDataStore = () => {
 
     }
 
+    const getNewOrders = () => newOrders;
+
     const getOrder = (id: string) => orders.find((o) => o.id === id);
 
     const addOrder = (orderData: Order) => {
@@ -69,7 +72,7 @@ const useDataStore = () => {
         // Add initial delivery update
         const newDeliveryUpdate: DeliveryUpdate = {
             id: `${deliveryUpdates.length + 1}`,
-            orderId: orderData.id,
+            orderId: orderData?.id,
             status: 'pending',
             timestamp: new Date(),
             note: 'Order received',
@@ -194,6 +197,8 @@ const useDataStore = () => {
         // Order operations
         getOrders,
         getOrder,
+        setNewOrders,
+        getNewOrders,
         addOrder,
         setAllOrders,
         updateOrderStatus,
