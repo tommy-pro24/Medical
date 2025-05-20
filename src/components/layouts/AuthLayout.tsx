@@ -12,7 +12,7 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
     const router = useRouter();
-    const { login, getCurrentUser, addOrder, setNewOrders, getNewOrders } = useData();
+    const { login, getCurrentUser, addOrder, setNewOrders, getNewOrders, updateOrderStatus } = useData();
     const { lastMessage } = useWebSocketContext();
 
     useEffect(() => {
@@ -76,6 +76,10 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
                         });
                     }
 
+                }
+            } else if (lastMessage.type === "SET_DISPATCHED") {
+                if ((getCurrentUser()?._id === lastMessage?.payload?.id) || (getCurrentUser()?.role !== 'client')) {
+                    updateOrderStatus(lastMessage?.payload?.orderId, lastMessage?.payload?.newStatus);
                 }
             }
         }
