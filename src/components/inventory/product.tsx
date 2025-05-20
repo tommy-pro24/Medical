@@ -2,12 +2,17 @@ import { AlertTriangle, Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useData } from "@/context/DataContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ProductItem(props: any) {
+
+    const { getCurrentUser } = useData();
+
+
     return (
         <Card
-            className={`overflow-hidden cursor-pointer transition-all ${props?.isSelected ? 'border-blue-500 ring-2 ring-blue-400' : props?.product.stockNumber <= props?.product.lowStockThreshold ? 'border-amber-500/50' : 'border-input'}`}
+            className={`overflow-hidden cursor-pointer transition-all ${props?.isSelected ? 'border-blue-500 ring-2 ring-blue-400' : ((getCurrentUser()?.role !== 'client') && (props?.product.stockNumber <= props?.product.lowStockThreshold)) ? 'border-amber-500/50' : 'border-input'}`}
             onClick={() => props?.currentUser?.role === 'client' && props?.handleSelectProduct(props?.product._id)}
         >
             <CardHeader className="pb-3">
@@ -18,7 +23,7 @@ export default function ProductItem(props: any) {
                             <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500" title="Selected"></span>
                         )}
                     </CardTitle>
-                    {props?.product.stockNumber <= props?.product.lowStockThreshold && (
+                    {((getCurrentUser()?.role !== 'client') && (props?.product.stockNumber <= props?.product.lowStockThreshold)) && (
                         <AlertTriangle className="h-5 w-5 text-amber-500" />
                     )}
                 </div>
@@ -31,7 +36,7 @@ export default function ProductItem(props: any) {
                         <span>Stock Level:</span>
                     </div>
                     <div
-                        className={`font-medium ${props?.product.stockNumber <= props?.product.lowStockThreshold ? 'text-amber-500' : 'text-foreground'}`}
+                        className={`font-medium ${((getCurrentUser()?.role !== 'client') && (props?.product.stockNumber <= props?.product.lowStockThreshold)) ? 'text-amber-500' : 'text-foreground'}`}
                     >
                         {props?.product.stockNumber} units
                     </div>
