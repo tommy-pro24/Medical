@@ -67,7 +67,7 @@ const useDataStore = () => {
 
     const addOrder = (orderData: Order) => {
 
-        setOrders([...orders, orderData]);
+        setOrders([orderData, ...orders]);
 
         // Add initial delivery update
         const newDeliveryUpdate: DeliveryUpdate = {

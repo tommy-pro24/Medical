@@ -192,7 +192,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold">Inventory Management</h1>
                 {/* Only show Add New Product for non-client */}
-                {currentUser?.role !== 'client' && (
+                {currentUser?.role === 'admin' && (
                     <Button onClick={handleAddProduct} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
                         Add New Product

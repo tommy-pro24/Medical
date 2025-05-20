@@ -50,7 +50,7 @@ export default function ProductItem(props: any) {
                             onClick={e => e.stopPropagation()}
                             className={props?.isSelected ? '' : 'opacity-50'}
                         />
-                    ) : (
+                    ) : props?.currentUser?.role === 'admin' ? (
                         <>
                             <Input
                                 type="number"
@@ -70,10 +70,10 @@ export default function ProductItem(props: any) {
                                 Add
                             </Button>
                         </>
-                    )}
+                    ) : <></>}
                 </div>
                 {/* Only show Edit Product for non-client */}
-                {props?.currentUser?.role !== 'client' && (
+                {props?.currentUser?.role == 'admin' && (
                     <div className="pt-2">
                         <Button
                             variant="secondary"

@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
     ShoppingCart, Package, FileText, Truck,
-    ChevronRight, Plus, Search, Check
+    ChevronRight, Search, Check
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -98,9 +98,9 @@ export default function OrdersPage() {
         setDialogOpen(true);
     };
 
-    const handleCreateOrder = () => {
-        setOrderDialogOpen(true);
-    };
+    // const handleCreateOrder = () => {
+    //     setOrderDialogOpen(true);
+    // };
 
     const handleStatusChange = (id: string, newStatus: Order['status']) => {
         updateOrderStatus(id, newStatus);
@@ -132,12 +132,12 @@ export default function OrdersPage() {
         <div className="space-y-6 w-full py-4 px-4 sm:px-6 md:px-10">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold">Orders Management</h1>
-                {currentUser?.role === 'client' && (
+                {/* {currentUser?.role === 'client' && (
                     <Button onClick={handleCreateOrder} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
                         New Order
                     </Button>
-                )}
+                )} */}
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="relative w-full sm:w-96">
@@ -282,45 +282,50 @@ export default function OrdersPage() {
                                     <div className="mt-4">
                                         <h3 className="text-sm font-medium mb-2">Update Order Status</h3>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <Button
-                                                variant="outline"
-                                                className="flex items-center justify-center gap-2"
-                                                disabled={['pending', 'confirmed'].includes(selectedOrder.status) === false}
-                                                onClick={() => handleStatusChange(selectedOrder.id, 'dispatched')}
-                                            >
-                                                <Package className="h-4 w-4" />
-                                                Mark as Dispatched
-                                            </Button>
+                                            {getCurrentUser()?.role !== 'admin' &&
+                                                <Button
+                                                    variant="outline"
+                                                    className="flex items-center justify-center gap-2"
+                                                    disabled={selectedOrder.status !== 'dispatched'}
+                                                    onClick={() => handleStatusChange(selectedOrder.id, 'in-transit')}
+                                                >
+                                                    <Truck className="h-4 w-4" />
+                                                    Mark as In Transit
+                                                </Button>
+                                            }
+                                            {getCurrentUser()?.role === 'admin' &&
+                                                <>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="flex items-center justify-center gap-2"
+                                                        disabled={selectedOrder.status !== 'pending'}
+                                                        onClick={() => handleStatusChange(selectedOrder.id, 'dispatched')}
+                                                    >
+                                                        <Package className="h-4 w-4" />
+                                                        Mark as Dispatched
+                                                    </Button>
 
-                                            <Button
-                                                variant="outline"
-                                                className="flex items-center justify-center gap-2"
-                                                disabled={selectedOrder.status !== 'dispatched'}
-                                                onClick={() => handleStatusChange(selectedOrder.id, 'in-transit')}
-                                            >
-                                                <Truck className="h-4 w-4" />
-                                                Mark as In Transit
-                                            </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="flex items-center justify-center gap-2"
+                                                        disabled={selectedOrder.status !== 'in-transit'}
+                                                        onClick={() => handleStatusChange(selectedOrder.id, 'confirmed')}
+                                                    >
+                                                        <Check className="h-4 w-4" />
+                                                        Comfrom Order
+                                                    </Button>
 
-                                            <Button
-                                                variant="outline"
-                                                className="flex items-center justify-center gap-2"
-                                                disabled={selectedOrder.status !== 'in-transit'}
-                                                onClick={() => handleStatusChange(selectedOrder.id, 'dispatched')}
-                                            >
-                                                <Check className="h-4 w-4" />
-                                                Comfrom Order
-                                            </Button>
-
-                                            <Button
-                                                variant="outline"
-                                                className="flex items-center justify-center gap-2"
-                                                disabled={['confirmed', 'cancelled'].includes(selectedOrder.status)}
-                                                onClick={() => handleStatusChange(selectedOrder.id, 'cancelled')}
-                                            >
-                                                <FileText className="h-4 w-4" />
-                                                Cancel Order
-                                            </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="flex items-center justify-center gap-2"
+                                                        disabled={selectedOrder.status !== 'in-transit'}
+                                                        onClick={() => handleStatusChange(selectedOrder.id, 'cancelled')}
+                                                    >
+                                                        <FileText className="h-4 w-4" />
+                                                        Cancel Order
+                                                    </Button>
+                                                </>
+                                            }
                                         </div>
                                     </div>
                                 )}
@@ -371,12 +376,12 @@ export default function OrdersPage() {
                                         Download Invoice
                                     </Button>
 
-                                    <Button
+                                    {/* <Button
                                         className="flex items-center justify-center gap-2 flex-1"
                                     >
                                         <Truck className="h-4 w-4" />
                                         Track Order
-                                    </Button>
+                                    </Button> */}
                                 </div>
                             </div>
                         </div>
