@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
     ShoppingCart, Package, FileText, Truck,
-    Calendar, ChevronRight, Plus, Search, Check
+    ChevronRight, Plus, Search, Check
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -33,7 +33,7 @@ export default function OrdersPage() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-    const { lastMessage } = useWebSocketContext();
+    const { lastMessage, sendMessage } = useWebSocketContext();
 
     useEffect(() => {
         if (lastMessage) {
@@ -108,13 +108,22 @@ export default function OrdersPage() {
             title: 'Order Status Updated',
             description: `Order #${id} status changed to ${newStatus}`
         });
+
+        sendMessage({
+            type: "SET_DISPATCHED",
+            payload: {
+                id, newStatus, token: getCurrentUser()?.token
+            },
+            timestamp: Date.now(),
+        })
+
         // Close dialog and refresh selected order
         setDialogOpen(false);
         setTimeout(() => {
             const updatedOrder = getOrders().find(o => o.id === id);
             if (updatedOrder) {
                 setSelectedOrder(updatedOrder);
-                setDialogOpen(true);
+                // setDialogOpen(true);
             }
         }, 10);
     };
@@ -299,8 +308,8 @@ export default function OrdersPage() {
                                                 disabled={selectedOrder.status !== 'in-transit'}
                                                 onClick={() => handleStatusChange(selectedOrder.id, 'dispatched')}
                                             >
-                                                <Calendar className="h-4 w-4" />
-                                                Mark as Dispatched
+                                                <Check className="h-4 w-4" />
+                                                Comfrom Order
                                             </Button>
 
                                             <Button
