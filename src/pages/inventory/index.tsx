@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Plus, ShoppingCart } from 'lucide-react';
+import { Search, Plus, ShoppingCart, History } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { Product } from "@/types";
 import { useData } from "@/context/DataContext";
@@ -10,6 +10,7 @@ import { request } from "@/lib/request";
 import ProductItem from "@/components/inventory/product";
 import { useWebSocketContext } from "@/context/WebSocketContext";
 import NewOrder from "@/components/inventory/newOrder";
+import Link from "next/link";
 
 interface InventoryProps {
     initialProducts?: Product[];
@@ -192,6 +193,23 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold">Inventory Management</h1>
                 {/* Only show Add New Product for non-client */}
+                <Button variant="outline" asChild>
+                    <Link href="/histories" className="flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        View History
+                    </Link>
+                </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="relative w-full sm:w-96">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search products..."
+                        className="pl-10 w-full"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
                 {currentUser?.role === 'admin' && (
                     <Button onClick={handleAddProduct} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
@@ -209,17 +227,6 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                         Order
                     </Button>
                 )}
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search products..."
-                        className="pl-10 w-full"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map(product => {

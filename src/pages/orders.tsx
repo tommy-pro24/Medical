@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
     ShoppingCart, Package, FileText, Truck,
-    ChevronRight, Search, Check
+    ChevronRight, Search, Check, Sparkles
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -29,6 +29,13 @@ export const metadata: Metadata = {
     title: 'Orders Management',
     description: 'Manage and track your orders',
 };
+
+const NewBadge = () => (
+    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg animate-pulse">
+        <Sparkles className="h-3 w-3" />
+        New
+    </div>
+);
 
 export default function OrdersPage() {
     const { getOrders, getCurrentUser, updateOrderStatus, setAllOrders } = useData();
@@ -169,9 +176,13 @@ export default function OrdersPage() {
                     return (
                         <Card
                             key={order.id}
-                            className="cursor-pointer border border-input hover:shadow-md transition-shadow bg-[#181f2a] rounded-xl px-0 sm:px-2 py-2"
+                            className="cursor-pointer border border-input hover:shadow-md transition-shadow bg-[#181f2a] rounded-xl px-0 sm:px-2 py-2 relative"
                             onClick={() => handleOrderClick(order)}
                         >
+                            {(getCurrentUser()?.role === 'admin' && order.status === 'pending') ||
+                                (getCurrentUser()?.role === 'warehouse' && order.status === 'dispatched') ? (
+                                <NewBadge />
+                            ) : null}
                             <CardContent className="p-0 sm:p-5">
                                 {/* Truly Responsive Grid Layout: Left (order info), Center (progress), Right (client/amount) */}
                                 <div className="w-full px-4 pb-4">

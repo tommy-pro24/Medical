@@ -57,3 +57,26 @@ export interface DeliveryUpdate {
     location?: string;
     updatedBy: string;
 }
+
+
+export interface InventoryHistory {
+    id: string;
+    productId: string;
+    productName: string;
+    actionType: 'add' | 'update' | 'delete' | 'stock-in' | 'stock-out';
+    timestamp: Date;
+    userId: string;
+    userName: string;
+    details: {
+        oldValue?: {
+            stockLevel?: number;
+            price?: number;
+        };
+        newValue?: {
+            stockLevel?: number;
+            price?: number;
+        };
+        quantity?: number;
+        reference?: string;
+    };
+}
