@@ -5,6 +5,7 @@ import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LogOut, Layout
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
+import Cookies from 'js-cookie';
 
 
 export default function List() {
@@ -21,7 +22,7 @@ export default function List() {
 
     const handleLogout = () => {
 
-        logout();
+        logout(); Cookies.set('id', '');
 
         router.push('/login/siginin');
 

@@ -9,74 +9,74 @@ export const products: Product[] = [];
 
 // Mock Orders
 export const orders: Order[] = [
-    {
-        id: '1',
-        clientId: '3',
-        clientName: 'ABC Hospital',
-        orderDate: new Date('2023-11-15'),
-        status: 'confirmed',
-        items: [
-            {
-                productId: '1',
-                productName: 'Blood Glucose Monitor',
-                quantity: 5,
-                unitPrice: 2500,
-                totalPrice: 12500,
-            },
-            {
-                productId: '4',
-                productName: 'Disposable Syringes (Pack of 50)',
-                quantity: 10,
-                unitPrice: 680,
-                totalPrice: 6800,
-            }
-        ],
-        deliveryAgent: 'John Smith',
-        deliveryDate: new Date('2023-11-18'),
-        totalAmount: 19300,
-    },
-    {
-        id: '2',
-        clientId: '3',
-        clientName: 'ABC Hospital',
-        orderDate: new Date('2023-11-28'),
-        status: 'in-transit',
-        items: [
-            {
-                productId: '2',
-                productName: 'Surgical Gloves (Box of 100)',
-                quantity: 15,
-                unitPrice: 1200,
-                totalPrice: 18000,
-            }
-        ],
-        deliveryAgent: 'Maria Johnson',
-        totalAmount: 18000,
-    },
-    {
-        id: '3',
-        clientId: '3',
-        clientName: 'ABC Hospital',
-        orderDate: new Date('2023-11-30'),
-        status: 'confirmed',
-        items: [
-            {
-                productId: '3',
-                productName: 'Digital Thermometer',
-                quantity: 8,
-                unitPrice: 850,
-                totalPrice: 6800,
-            },
-            {
-                productId: '5',
-                productName: 'Stethoscope',
-                quantity: 3,
-                unitPrice: 3200,
-                totalPrice: 9600,
-            }
-        ],
-        totalAmount: 16400,
-    },
+    // {
+    //     id: '1',
+    //     clientId: '3',
+    //     clientName: 'ABC Hospital',
+    //     orderDate: new Date('2023-11-15'),
+    //     status: 'confirmed',
+    //     items: [
+    //         {
+    //             productId: '1',
+    //             productName: 'Blood Glucose Monitor',
+    //             quantity: 5,
+    //             unitPrice: 2500,
+    //             totalPrice: 12500,
+    //         },
+    //         {
+    //             productId: '4',
+    //             productName: 'Disposable Syringes (Pack of 50)',
+    //             quantity: 10,
+    //             unitPrice: 680,
+    //             totalPrice: 6800,
+    //         }
+    //     ],
+    //     deliveryAgent: 'John Smith',
+    //     deliveryDate: new Date('2023-11-18'),
+    //     totalAmount: 19300,
+    // },
+    // {
+    //     id: '2',
+    //     clientId: '3',
+    //     clientName: 'ABC Hospital',
+    //     orderDate: new Date('2023-11-28'),
+    //     status: 'in-transit',
+    //     items: [
+    //         {
+    //             productId: '2',
+    //             productName: 'Surgical Gloves (Box of 100)',
+    //             quantity: 15,
+    //             unitPrice: 1200,
+    //             totalPrice: 18000,
+    //         }
+    //     ],
+    //     deliveryAgent: 'Maria Johnson',
+    //     totalAmount: 18000,
+    // },
+    // {
+    //     id: '3',
+    //     clientId: '3',
+    //     clientName: 'ABC Hospital',
+    //     orderDate: new Date('2023-11-30'),
+    //     status: 'confirmed',
+    //     items: [
+    //         {
+    //             productId: '3',
+    //             productName: 'Digital Thermometer',
+    //             quantity: 8,
+    //             unitPrice: 850,
+    //             totalPrice: 6800,
+    //         },
+    //         {
+    //             productId: '5',
+    //             productName: 'Stethoscope',
+    //             quantity: 3,
+    //             unitPrice: 3200,
+    //             totalPrice: 9600,
+    //         }
+    //     ],
+    //     totalAmount: 16400,
+    // },
 ];
 
 // Mock Delivery Updates

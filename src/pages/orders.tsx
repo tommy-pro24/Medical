@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { request } from '@/lib/request';
 
 const ORDER_STEPS = [
     { key: 'pending', label: 'Pending', icon: <Check className="h-4 w-4" /> },
@@ -27,56 +28,58 @@ export const metadata: Metadata = {
 };
 
 export default function OrdersPage() {
-    const { getOrders, getCurrentUser, updateOrderStatus } = useData();
+    const { getOrders, getCurrentUser, updateOrderStatus, setAllOrders } = useData();
     const [search, setSearch] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-    const { sendMessage, lastMessage } = useWebSocketContext();
-    const [orders, setOrders] = useState<Order[]>([]);
-
-    useEffect(() => {
-        onLoad();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const { lastMessage } = useWebSocketContext();
 
     useEffect(() => {
         if (lastMessage) {
-            if (lastMessage.type === 'GET_ORDERS_RESPONSE') {
-
-                setOrders(lastMessage?.payload?.orders);
-
-            } else if (lastMessage.type === 'GET_ORDERS_ERROR') {
+            if (lastMessage.type === 'GET_ORDERS_ERROR') {
 
                 toast({
                     title: "Get orders error",
                     description: ""
                 })
-
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastMessage]);
 
+    useEffect(() => {
+        if (getCurrentUser()) {
+            onLoad();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [getCurrentUser()])
+
     const onLoad = async () => {
-        sendMessage({
-            type: "GET_ORDERS",
-            payload: {
-                token: getCurrentUser()?.token
-            },
-            timestamp: Date.now(),
+
+        const response = await request({
+            method: "POST",
+            url: '/order/getAllOrders',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getCurrentUser()?.token}`
+            }
         })
+
+        setAllOrders(response);
+
     }
 
     const currentUser = getCurrentUser();
 
     // If client is logged in, filter orders to only show their orders
     const filteredOrders = currentUser?.role === 'client'
-        ? orders.filter(o => o.clientId === currentUser._id)
-        : orders;
+        ? getOrders()?.filter(o => o.clientId === currentUser._id)
+        : getOrders();
 
     const searchedOrders = filteredOrders.filter(order =>
-        order.id.includes(search) ||
-        order.clientName.toLowerCase().includes(search.toLowerCase())
+        order?.id?.includes(search) ||
+        order?.clientName.toLowerCase().includes(search.toLowerCase())
     );
 
     const getStatusColor = (status: Order['status']) => {
@@ -188,7 +191,7 @@ export default function OrdersPage() {
                                             </div>
                                             <div className="mt-1">
                                                 <div className="text-xs text-muted-foreground">Amount</div>
-                                                <div className="font-medium">₹{order.totalAmount.toLocaleString()}</div>
+                                                <div className="font-medium">₹{order?.totalAmount?.toLocaleString()}</div>
                                             </div>
                                             <ChevronRight className="h-5 w-5 text-muted-foreground mt-2 hidden sm:block" />
                                         </div>
@@ -231,12 +234,12 @@ export default function OrdersPage() {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center justify-between">
+                                        {/* <div className="flex items-center justify-between">
                                             <span className="text-muted-foreground">Invoice Status</span>
-                                            {/* <span className="font-medium">
+                                            <span className="font-medium">
                                                 {selectedOrder.invoiceStatus.replace('-', ' ')}
-                                            </span> */}
-                                        </div>
+                                            </span>
+                                        </div> */}
 
                                         <div className="flex items-center justify-between">
                                             <span className="text-muted-foreground">Client</span>
@@ -336,7 +339,7 @@ export default function OrdersPage() {
                                                     </div>
                                                 </div>
                                                 <div className="font-medium">
-                                                    ₹{item.totalPrice.toLocaleString()}
+                                                    ₹{(item.quantity * item.unitPrice).toString()}
                                                 </div>
                                             </div>
                                         ))}
@@ -386,7 +389,7 @@ export default function OrdersPage() {
 }
 
 const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const { getProducts, getCurrentUser, addOrder } = useData();
+    const { getProducts, getCurrentUser } = useData();
     const [selectedProducts, setSelectedProducts] = useState<Record<string, number>>({});
 
     const currentUser = getCurrentUser();
@@ -429,16 +432,17 @@ const NewOrderForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             return;
         }
 
-        const newOrder = addOrder({
-            clientId: currentUser._id,
-            clientName: currentUser.name,
-            items: orderItems
-        });
+        // const newOrder = addOrder({
+        //     clientId: currentUser._id,
+        //     clientName: currentUser.name,
+        //     items: orderItems,
+        //     orderDate: new Date(),
+        // });
 
-        toast({
-            title: 'Order Created',
-            description: `Your order #${newOrder.id} has been created successfully`
-        });
+        // toast({
+        //     title: 'Order Created',
+        //     description: `Your order #${newOrder.id} has been created successfully`
+        // });
 
         onClose();
     };
