@@ -84,6 +84,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             });
 
             const product = products.find(p => p._id === productId);
+
             if (product) {
                 updateProduct({
                     ...product,
@@ -94,6 +95,7 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
                     description: `${product.name} stock level updated to ${newStock}`,
                 });
             }
+
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.log(error.message);
@@ -152,6 +154,19 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             }
         }
 
+        for (const [productId, quantityStr] of Object.entries(selectedProducts)) {
+            const quantity = Number(quantityStr);
+            const product = products.find(p => p._id === productId);
+
+            if (product) {
+                updateProduct({
+                    ...product,
+                    stockNumber: product.stockNumber - quantity,
+                });
+            }
+        }
+
+
         sendMessage({
             type: "SET_NEW_ORDER",
             payload: {
@@ -193,12 +208,15 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold">Inventory Management</h1>
                 {/* Only show Add New Product for non-client */}
-                <Button variant="outline" asChild>
-                    <Link href="/histories" className="flex items-center gap-2">
-                        <History className="h-4 w-4" />
-                        View History
-                    </Link>
-                </Button>
+                {getCurrentUser()?.role !== 'client' &&
+                    <Button variant="outline" asChild>
+                        <Link href="/histories" className="flex items-center gap-2">
+                            <History className="h-4 w-4" />
+                            View History
+                        </Link>
+                    </Button>
+
+                }
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="relative w-full sm:w-96">
