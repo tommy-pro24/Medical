@@ -1,94 +1,107 @@
-import LowProducts from "../ui/lowProducts";
-import Orders from "../ui/orders";
-import TotalProduct from "../ui/totalProduct";
-import Transit from "../ui/transit";
-
-export default function TotalBox() {
-    // Color palette for a modern dark dashboard
-    const cardStyles = [
-        {
-            border: "border border-white/10",
-            accent: "text-white",
-            icon: "text-white",
-            title: "text-white",
-            desc: "text-[#ffffff7c]"
-        },
-        {
-            border: "border border-yellow-400/10",
-            bg: "bg-yellow-400/5 backdrop-blur-sm",
-            accent: "text-yellow-300",
-            icon: "text-yellow-200",
-            title: "text-yellow-100",
-            desc: "text-yellow-200/80"
-        },
-        {
-            border: "border border-white/10",
-            accent: "text-white",
-            icon: "text-white",
-            title: "text-white",
-            desc: "text-[#ffffff7c]"
-        },
-        {
-            border: "border border-white/10",
-            accent: "text-white",
-            icon: "text-white",
-            title: "text-white",
-            desc: "text-[#ffffff7c]"
-        },
-        {
-            border: "border border-green-400/10",
-            bg: "bg-green-400/5 backdrop-blur-sm",
-            accent: "text-green-300",
-            icon: "text-green-200",
-            title: "text-green-100",
-            desc: "text-green-200/80"
-        }
-    ];
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function TotalBox(props: any) {
     // Data for each card
-    const cards = [
-        {
-            title: "Total Products",
-            value: "5 types, 35 pieces",
-            desc: "Items in inventory",
-            Icon: TotalProduct,
-            style: 0
-        },
-        {
-            title: "Low Stock Alert",
-            value: "5 types",
-            desc: "Items need restock",
-            Icon: LowProducts,
-            style: 1
-        },
-        {
-            title: "Pending",
-            value: "5",
-            desc: "Awaiting processing",
-            Icon: Orders,
-            style: 2
-        },
-        {
-            title: "In Transit",
-            value: "5",
-            desc: "Currently in delivery",
-            Icon: Transit,
-            style: 3
-        },
-        {
-            title: "Pending1",
-            value: "5",
-            desc: "Completed deliveries",
-            Icon: Orders,
-            style: 4
-        }
-    ];
-
     return (
         <div className="w-full space-y-6">
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-2 md:p-6">
-                {cards.map((card) => {
-                    const style = cardStyles[card.style];
+                {props?.cards.map((card: any) => {
+                    // Determine styles based on card title
+                    const getCardStyles = (title: string) => {
+                        switch (title.toLowerCase()) {
+                            case "total products":
+                                return {
+                                    border: "border border-blue-900/60",
+                                    bg: "bg-blue-900/30",
+                                    accent: "text-blue-300",
+                                    icon: "text-blue-300",
+                                    title: "text-blue-200",
+                                    desc: "text-blue-200/70"
+                                };
+                            case "low stock alert":
+                                return {
+                                    border: "border border-yellow-700/60",
+                                    bg: "bg-yellow-900/20",
+                                    accent: "text-yellow-300",
+                                    icon: "text-yellow-300",
+                                    title: "text-yellow-200",
+                                    desc: "text-yellow-200/70"
+                                };
+                            case "stock in":
+                                return {
+                                    border: "border border-emerald-900/60",
+                                    bg: "bg-emerald-900/20",
+                                    accent: "text-emerald-300",
+                                    icon: "text-emerald-300",
+                                    title: "text-emerald-200",
+                                    desc: "text-emerald-200/70"
+                                };
+                            case "stock out":
+                                return {
+                                    border: "border border-rose-900/60",
+                                    bg: "bg-rose-900/20",
+                                    accent: "text-rose-300",
+                                    icon: "text-rose-300",
+                                    title: "text-rose-200",
+                                    desc: "text-rose-200/70"
+                                };
+                            case "pending":
+                                return {
+                                    border: "border border-orange-900/60",
+                                    bg: "bg-orange-900/20",
+                                    accent: "text-orange-300",
+                                    icon: "text-orange-300",
+                                    title: "text-orange-200",
+                                    desc: "text-orange-200/70"
+                                };
+                            case "dispatched":
+                                return {
+                                    border: "border border-purple-900/60",
+                                    bg: "bg-purple-900/20",
+                                    accent: "text-purple-300",
+                                    icon: "text-purple-300",
+                                    title: "text-purple-200",
+                                    desc: "text-purple-200/70"
+                                };
+                            case "in-transit":
+                                return {
+                                    border: "border border-blue-900/60",
+                                    bg: "bg-blue-900/20",
+                                    accent: "text-blue-300",
+                                    icon: "text-blue-300",
+                                    title: "text-blue-200",
+                                    desc: "text-blue-200/70"
+                                };
+                            case "confirmed":
+                                return {
+                                    border: "border border-emerald-900/60",
+                                    bg: "bg-emerald-900/20",
+                                    accent: "text-emerald-300",
+                                    icon: "text-emerald-300",
+                                    title: "text-emerald-200",
+                                    desc: "text-emerald-200/70"
+                                };
+                            case "cancelled":
+                                return {
+                                    border: "border border-rose-900/60",
+                                    bg: "bg-rose-900/20",
+                                    accent: "text-rose-300",
+                                    icon: "text-rose-300",
+                                    title: "text-rose-200",
+                                    desc: "text-rose-200/70"
+                                };
+                            default:
+                                return {
+                                    border: "border border-white/10",
+                                    accent: "text-white",
+                                    icon: "text-white",
+                                    title: "text-white",
+                                    desc: "text-[#ffffff7c]"
+                                };
+                        }
+                    };
+
+                    const style = getCardStyles(card.title);
                     return (
                         <div
                             key={card.title}
