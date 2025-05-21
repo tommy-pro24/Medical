@@ -75,7 +75,7 @@ export default function List() {
                                         All
                                     </div>
                                     {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={totalLowStock} />
+                                        <NotificationBadge count={totalLowStock} variant="inventory" />
                                     }
                                 </Link>
                                 <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
@@ -84,7 +84,7 @@ export default function List() {
                                         Diagnostic
                                     </div>
                                     {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={diagnosticLowStock} />
+                                        <NotificationBadge count={diagnosticLowStock} variant="inventory" />
                                     }
                                 </Link>
                                 <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
@@ -93,7 +93,7 @@ export default function List() {
                                         Surgical
                                     </div>
                                     {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={surgicalLowStock} />
+                                        <NotificationBadge count={surgicalLowStock} variant="inventory" />
                                     }
                                 </Link>
                                 <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
@@ -102,7 +102,7 @@ export default function List() {
                                         Consumables
                                     </div>
                                     {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={consumableLowStock} />
+                                        <NotificationBadge count={consumableLowStock} variant="inventory" />
                                     }
                                 </Link>
                             </div>
@@ -113,7 +113,7 @@ export default function List() {
                                 Orders/Delivery
                             </div>
                             {Number(getNewOrders()) > 0 &&
-                                <NotificationBadge count={getNewOrders()} />
+                                <NotificationBadge count={getNewOrders()} variant="orders" />
                             }
                         </Link>
                     </nav>
@@ -172,7 +172,7 @@ export default function List() {
                                             All
                                         </div>
                                         {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={totalLowStock} />
+                                            <NotificationBadge count={totalLowStock} variant="inventory" />
                                         }
                                     </Link>
                                     <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
@@ -181,7 +181,7 @@ export default function List() {
                                             Diagnostic
                                         </div>
                                         {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={diagnosticLowStock} />
+                                            <NotificationBadge count={diagnosticLowStock} variant="inventory" />
                                         }
                                     </Link>
                                     <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
@@ -190,7 +190,7 @@ export default function List() {
                                             Surgical
                                         </div>
                                         {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={surgicalLowStock} />
+                                            <NotificationBadge count={surgicalLowStock} variant="inventory" />
                                         }
                                     </Link>
                                     <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
@@ -199,7 +199,7 @@ export default function List() {
                                             Consumables
                                         </div>
                                         {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={consumableLowStock} />
+                                            <NotificationBadge count={consumableLowStock} variant="inventory" />
                                         }
                                     </Link>
                                 </div>
@@ -210,7 +210,7 @@ export default function List() {
                                     Orders/Delivery
                                 </div>
                                 {Number(getNewOrders()) > 0 &&
-                                    <NotificationBadge count={getNewOrders()} />
+                                    <NotificationBadge count={getNewOrders()} variant="orders" />
                                 }
                             </Link>
                         </nav>
