@@ -116,6 +116,12 @@ export default function List() {
                                 <NotificationBadge count={getNewOrders()} variant="orders" />
                             }
                         </Link>
+                        {getCurrentUser()?.role === 'admin' &&
+                            <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
+                                <Truck className="w-5 h-5 mr-3" />
+                                userManagement
+                            </Link>
+                        }
                     </nav>
                 </div>
                 <div className="pt-4 border-t border-gray-700">
