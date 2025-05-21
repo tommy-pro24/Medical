@@ -37,17 +37,17 @@ const useDataStore = () => {
         try {
 
 
-            const oldProduct = products.find(p => p._id === product.id);
-            setProducts(products.map((p) => (p._id === product.id ? product : p)));
+            const oldProduct = products.find(p => p._id === product._id);
+            setProducts(products.map((p) => (p._id === product._id ? product : p)));
 
             // Track product update in history
             if (oldProduct) {
                 const historyEntry: InventoryHistory = {
                     id: `${inventoryHistory.length + 1}`,
-                    productId: product.id,
+                    productId: product._id,
                     productName: product.name,
                     actionType: 'update',
-                    createAt: new Date(),
+                    createdAt: new Date(),
                     userId: currentUser?._id || 'system',
                     userName: currentUser?.name || 'System',
                     details: {
@@ -84,7 +84,7 @@ const useDataStore = () => {
                 productId: id,
                 productName: productToDelete.name,
                 actionType: 'delete',
-                createAt: new Date(),
+                createdAt: new Date(),
                 userId: currentUser?._id || 'system',
                 userName: currentUser?.name || 'System',
                 details: {
@@ -248,7 +248,7 @@ const useDataStore = () => {
                 productId: product._id,
                 productName: product.name,
                 actionType: transaction.type === 'in' ? 'stock-in' : 'stock-out',
-                createAt: new Date(),
+                createdAt: new Date(),
                 userId: currentUser?._id || 'system',
                 userName: currentUser?.name || 'System',
                 details: {
