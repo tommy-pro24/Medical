@@ -67,7 +67,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
                 setNewOrders(getNewOrders() + 1);
                 toast({
                     title: 'Order Created',
-                    description: `Neworder has been created successfully`
+                    description: `New order has been received.`
                 });
             }
 

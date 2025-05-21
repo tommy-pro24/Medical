@@ -78,7 +78,7 @@ export function PaginatedItems<T>({
                                         <div className="flex h-9 w-9 items-center justify-center">...</div>
                                     </PaginationItem>
                                 ) : (
-                                    <PaginationItem>
+                                    <PaginationItem className=' cursor-pointer'>
                                         <PaginationLink
                                             isActive={page === currentPage}
                                             onClick={() => paginate(page)}
