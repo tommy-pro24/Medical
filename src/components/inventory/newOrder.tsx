@@ -67,11 +67,11 @@ export default function NewOrder(props: any) {
                         </div>
                         <div className="flex items-center justify-between mb-4">
                             <span className="font-medium">Total Count</span>
-                            <span className="font-medium text-lg">₹{props?.totalOrderCount.toLocaleString()}</span>
+                            <span className="font-medium text-lg">{props?.totalOrderCount.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between mb-4">
                             <span className="font-medium">Total Types</span>
-                            <span className="font-medium text-lg">₹{props?.totalOrderType.toLocaleString()}</span>
+                            <span className="font-medium text-lg">{props?.totalOrderType.toLocaleString()}</span>
                         </div>
                     </div>
                     <div className="flex justify-end gap-3">
