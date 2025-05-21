@@ -63,8 +63,8 @@ export interface InventoryHistory {
     id: string;
     productId: string;
     productName: string;
-    actionType: 'add' | 'update' | 'delete' | 'stock-in' | 'stock-out';
-    timestamp: Date;
+    actionType: 'new' | 'update' | 'delete' | 'stock-in' | 'stock-out';
+    createdAt: Date;
     userId: string;
     userName: string;
     details: {

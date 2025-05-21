@@ -47,7 +47,7 @@ const useDataStore = () => {
                     productId: product.id,
                     productName: product.name,
                     actionType: 'update',
-                    timestamp: new Date(),
+                    createAt: new Date(),
                     userId: currentUser?._id || 'system',
                     userName: currentUser?.name || 'System',
                     details: {
@@ -84,7 +84,7 @@ const useDataStore = () => {
                 productId: id,
                 productName: productToDelete.name,
                 actionType: 'delete',
-                timestamp: new Date(),
+                createAt: new Date(),
                 userId: currentUser?._id || 'system',
                 userName: currentUser?.name || 'System',
                 details: {
@@ -94,7 +94,7 @@ const useDataStore = () => {
                     }
                 }
             };
-            setInventoryHistory([...inventoryHistory, historyEntry]);
+            setInventoryHistory([historyEntry, ...inventoryHistory]);
         }
     };
 
@@ -104,6 +104,12 @@ const useDataStore = () => {
 
     // Inventory History
     const getInventoryHistory = () => inventoryHistory;
+
+    //set all history
+
+    const setHistories = (histories: SetStateAction<InventoryHistory[]>) => {
+        setInventoryHistory(histories);
+    }
 
     // Order Operations
     const getOrders = () => orders;
@@ -193,7 +199,7 @@ const useDataStore = () => {
         const newUpdate = {
             ...update,
             id: `${deliveryUpdates.length + 1}`,
-            timestamp: new Date(),
+            createAt: new Date(),
         };
 
         setDeliveryUpdates([...deliveryUpdates, newUpdate]);
@@ -242,7 +248,7 @@ const useDataStore = () => {
                 productId: product._id,
                 productName: product.name,
                 actionType: transaction.type === 'in' ? 'stock-in' : 'stock-out',
-                timestamp: new Date(),
+                createAt: new Date(),
                 userId: currentUser?._id || 'system',
                 userName: currentUser?.name || 'System',
                 details: {
@@ -280,6 +286,7 @@ const useDataStore = () => {
 
         // Inventory history
         getInventoryHistory,
+        setHistories,
 
         // User operations
         getUsers,
