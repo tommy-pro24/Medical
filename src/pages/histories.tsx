@@ -2,22 +2,63 @@
 
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useData } from '../context/DataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PaginatedItems } from '@/components/histories/PaginatedItems';
 import { Search, Package, ArrowUp, ArrowDown, Plus, Pencil, Trash } from 'lucide-react';
 import { InventoryHistory } from '@/types';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
+import { request } from '@/lib/request';
 
 const InventoryHistoryPage = () => {
-    const { getInventoryHistory } = useData();
+    const { getCurrentUser, setHistories, getInventoryHistory } = useData();
     const [search, setSearch] = useState('');
     const inventoryHistory = getInventoryHistory();
-    // const products = getProducts();
+    const [date, setDate] = React.useState<DateRange | undefined>({
+        from: subDays(new Date(), 7),
+        to: new Date(),
+    })
+
+    useEffect(() => {
+        if (getCurrentUser() && date?.from && date?.to) {
+            getHistoryies();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [getCurrentUser(), date])
+
+    const getHistoryies = async () => {
+
+        try {
+
+            const response = await request({
+                method: "POST",
+                url: '/history/getHistories',
+                data: {
+                    from: date?.from,
+                    to: date?.to
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCurrentUser()?.token}`
+                }
+            });
+
+            if (response) {
+                console.log(response);
+                setHistories(response);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
 
     // Filter history entries based on search term
     const filteredHistory = inventoryHistory.filter(entry =>
@@ -26,15 +67,15 @@ const InventoryHistoryPage = () => {
         entry.actionType.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Sort history by timestamp (most recent first)
+    // Sort history by createAt (most recent first)
     const sortedHistory = [...filteredHistory].sort((a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     // Get action badge variant and icon based on action type
     const getActionBadge = (action: InventoryHistory['actionType']) => {
         switch (action) {
-            case 'add':
+            case 'new':
                 return {
                     variant: 'default',
                     icon: <Plus className="h-3 w-3 mr-1" />,
@@ -140,7 +181,7 @@ const InventoryHistoryPage = () => {
                                             return (
                                                 <TableRow key={entry.id} className="hover:bg-muted/50">
                                                     <TableCell className="whitespace-nowrap text-sm">
-                                                        {format(new Date(entry.timestamp), 'MMM d, yyyy h:mm a')}
+                                                        {entry.createdAt ? format(new Date(entry.createdAt), 'MMM d, yyyy h:mm a') : 'N/A'}
                                                     </TableCell>
                                                     <TableCell className="whitespace-nowrap">
                                                         <div className="flex items-center gap-2">
@@ -205,7 +246,7 @@ const InventoryHistoryPage = () => {
                             <Card key={entry.id} className="p-0">
                                 <CardContent className="py-4 px-4 flex flex-col gap-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs text-muted-foreground">{format(new Date(entry.timestamp), 'MMM d, yyyy h:mm a')}</span>
+                                        <span className="text-xs text-muted-foreground">{format(new Date(entry.createdAt), 'MMM d, yyyy h:mm a')}</span>
                                         <Badge
                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             variant={actionBadge.variant as any}
@@ -254,14 +295,17 @@ const InventoryHistoryPage = () => {
                 <h1 className="text-2xl xl:text-3xl font-bold">Inventory History</h1>
             </div>
 
-            <div className="relative w-full xl:w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search history..."
-                    className="pl-10"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="relative w-full sm:w-96">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search orders..."
+                        className="pl-10 w-full"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                <DateRangePicker setDate={setDate} date={date} />
             </div>
 
             <div className="overflow-x-auto">
