@@ -335,7 +335,7 @@ export default function OrdersPage() {
                                                         onClick={() => handleStatusChange(selectedOrder.id, 'confirmed')}
                                                     >
                                                         <Check className="h-4 w-4" />
-                                                        Comfrom Order
+                                                        Confirm Order
                                                     </Button>
 
                                                     <Button

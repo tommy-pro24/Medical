@@ -6,11 +6,17 @@ import DashboardBarChart from "@/components/dashboard/DashboardBarChart";
 import { useEffect } from "react";
 import { useData } from "@/context/DataContext";
 import { useWebSocketContext } from '@/context/WebSocketContext';
+import { DateRange } from "react-day-picker";
+import React from "react";
+import { subDays } from "date-fns";
 
 export default function Home() {
   const { getCurrentUser } = useData();
   const { sendMessage } = useWebSocketContext();
-
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  })
   useEffect(() => {
     onLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -30,7 +36,7 @@ export default function Home() {
     <main className="m-0 px-4 sm:px-8 md:px-12 lg:px-20 bg-[#0f1729] w-full flex flex-col gap-5 min-h-screen text-white">
       <div className="flex flex-col sm:flex-row w-full py-4 sm:py-6 md:py-8 items-center justify-between px-2 md:px-6 gap-4">
         <p className="text-gray-100 font-bold text-xl sm:text-2xl md:text-[25px] c459m cbtcb">Dashboard</p>
-        <DateRangePicker />
+        <DateRangePicker setDate={setDate} date={date} />
       </div>
       <div className="flex flex-col gap-10 sm:gap-16 md:gap-20">
         <div className="flex flex-col px-2 pb-3 border-b border-b-[#ffffff49]">

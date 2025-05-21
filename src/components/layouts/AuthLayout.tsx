@@ -21,7 +21,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
             const currentUser = getCurrentUser();
 
             // If no user ID in cookies, redirect to login
-            if (!userId) {
+            if (!userId && !router.pathname.includes('/login/')) {
                 router.push('/login/signin');
                 return;
             }
