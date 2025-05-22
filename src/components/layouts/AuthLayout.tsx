@@ -75,7 +75,8 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
     }
 
     const setDispatch = () => {
-        if ((getCurrentUser()?._id === lastMessage?.payload?.id) || (getCurrentUser()?.role !== 'client')) {
+
+        if ((getCurrentUser()?._id === lastMessage?.payload?.userId) || (getCurrentUser()?.role !== 'client')) {
 
             updateOrderStatus(lastMessage?.payload?.orderId, lastMessage?.payload?.newStatus);
 

@@ -58,7 +58,7 @@ const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     disabled={orderDisabled}
                 >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Order ({selectedProductsCount})
+                    Place Order ({selectedProductsCount})
                 </Button>
             )}
         </div>

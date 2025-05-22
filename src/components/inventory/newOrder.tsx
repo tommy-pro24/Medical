@@ -66,7 +66,7 @@ export default function NewOrder(props: any) {
                             <span className="font-medium text-lg">₹{props?.totalOrderAmount.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between mb-4">
-                            <span className="font-medium">Total Count</span>
+                            <span className="font-medium">Total Quantity</span>
                             <span className="font-medium text-lg">{props?.totalOrderCount.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between mb-4">
@@ -80,7 +80,7 @@ export default function NewOrder(props: any) {
                         </Button>
                         <Button onClick={props?.handlePlaceOrder} disabled={Object.keys(props?.selectedProducts).length === 0}>
                             <ShoppingCart className="h-4 w-4 mr-2" />
-                            Place Order
+                            Confirm Order
                         </Button>
                     </div>
                 </div>
