@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useData } from '@/context/DataContext';
 import { PaginatedItems } from '@/components/histories/PaginatedItems';
@@ -43,32 +45,29 @@ const UserManagement = () => {
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        if (getCurrentUser()) getUsers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getCurrentUser()])
+        if (getCurrentUser()) {
+            getUsers();
+        }
+    }, [getCurrentUser()]);
 
     const getUsers = async () => {
-        console.log(getCurrentUser()?.role);
         try {
-
             const response = await request({
                 method: "POST",
-                url: '/auth/getAllUsers',
+                url: '/api/auth/getAllUsers',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getCurrentUser()?.token}`
                 }
-            })
+            });
 
             if (response) {
                 setUsers(response);
             }
-
         } catch (error) {
-            console.log(error);
+            console.error('Error fetching users:', error);
         }
-
-    }
+    };
 
     // Set up form
     const form = useForm<z.infer<typeof userFormSchema>>({
@@ -111,7 +110,7 @@ const UserManagement = () => {
 
             await request({
                 method: "POST",
-                url: "/auth/updateUser",
+                url: "/api/auth/updateUser",
                 data: {
                     _id: editingUser._id,
                     name: data.name,
@@ -125,11 +124,11 @@ const UserManagement = () => {
             }, {
                 successMessage: "User role updated successfully!",
                 showToast: true
-            })
+            });
 
             getUsers();
         } catch (error) {
-            console.log(error);
+            console.error('Error updating user:', error);
         }
     };
 
