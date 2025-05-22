@@ -192,7 +192,7 @@ export default function OrdersPage() {
 
             {selectedOrder && (
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogContent className="max-w-3xl">
+                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Order #{selectedOrder.id}</DialogTitle>
                         </DialogHeader>
@@ -313,23 +313,24 @@ export default function OrdersPage() {
                                     </CardHeader>
 
                                     <CardContent className="space-y-4">
-                                        {selectedOrder.items.map((item, index) => (
-                                            <div
-                                                key={`${item.productId}-${index}`}
-                                                className="flex items-center justify-between border-b border-border pb-3 last:border-0"
-                                            >
-                                                <div>
-                                                    <div className="font-medium">{item.productName}</div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {item.quantity} x ₹{item.unitPrice.toLocaleString()}
+                                        <div className="sm:max-h-[300px] max-h-none sm:overflow-y-auto overflow-visible sm:pr-2 sm:scrollbar-thin sm:scrollbar-thumb-blue-700 sm:scrollbar-track-blue-200 sm:rounded-md scrollbar-none">
+                                            {selectedOrder.items.map((item, index) => (
+                                                <div
+                                                    key={`${item.productId}-${index}`}
+                                                    className="flex items-center justify-between border-b border-border pb-3 last:border-0"
+                                                >
+                                                    <div>
+                                                        <div className="font-medium">{item.productName}</div>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            {item.quantity} x ₹{item.unitPrice.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        ₹{(item.quantity * item.unitPrice).toString()}
                                                     </div>
                                                 </div>
-                                                <div className="font-medium">
-                                                    ₹{(item.quantity * item.unitPrice).toString()}
-                                                </div>
-                                            </div>
-                                        ))}
-
+                                            ))}
+                                        </div>
                                         <div className="flex items-center justify-between border-t border-border pt-3 mt-3">
                                             <span className="font-medium">Total</span>
                                             <span className="font-medium text-lg">

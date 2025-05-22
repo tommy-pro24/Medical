@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { request } from '@/lib/request';
 import { useRouter } from 'next/router';
-import { useData } from '@/context/DataContext';
 import Cookies from 'js-cookie';
 
 
@@ -18,8 +17,6 @@ export default function Signin() {
     const [email, setEmail] = useState('');
 
     const [password, setPassword] = useState('');
-
-    const { login } = useData();
 
     const router = useRouter();
 
@@ -54,8 +51,6 @@ export default function Signin() {
             })
 
             if (response) {
-
-                login(response);
 
                 Cookies.set('id', response._id);
 

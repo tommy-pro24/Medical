@@ -12,6 +12,7 @@ const useDataStore = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]); // Default to admin for demo
     const [inventoryHistory, setInventoryHistory] = useState<InventoryHistory[]>(mockInventoryHistory);
     const [newOrders, setNewOrders] = useState(0);
+    const [selectedProducts, setSelectedProducts] = useState<Record<string, number>>({});
 
     // Product Operations
     const getProducts = () => products;
@@ -20,6 +21,23 @@ const useDataStore = () => {
 
     const setAllProduct = (products: SetStateAction<Product[]>) => {
         setProducts(products);
+    }
+
+    const getSelectedProducts = () => selectedProducts;
+
+    const setSelectedProductsState = (products: Record<string, number>) => {
+        setSelectedProducts(products);
+    }
+
+    const updateSelectedProduct = (productId: string, quantity?: number) => {
+        setSelectedProducts(prev => {
+            if (!quantity) {
+                const newSelected = { ...prev };
+                delete newSelected[productId];
+                return newSelected;
+            }
+            return { ...prev, [productId]: quantity };
+        });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,6 +303,9 @@ const useDataStore = () => {
         deleteProduct,
         getLowStockProducts,
         setAllProduct,
+        getSelectedProducts,
+        setSelectedProductsState,
+        updateSelectedProduct,
 
         // Order operations
         getOrders,

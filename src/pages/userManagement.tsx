@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -54,7 +55,7 @@ const UserManagement = () => {
         try {
             const response = await request({
                 method: "POST",
-                url: '/api/auth/getAllUsers',
+                url: '/auth/getAllUsers',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getCurrentUser()?.token}`
