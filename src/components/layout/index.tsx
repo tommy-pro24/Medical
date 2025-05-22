@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import List from '../list';
 import Navbar from '../navbar';
-import Foot from '../foot';
+import Footer from '../foot';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <main className="flex-1">
                     {children}
                 </main>
-                <Foot />
+                <Footer />
             </div>
         </div>
     );
