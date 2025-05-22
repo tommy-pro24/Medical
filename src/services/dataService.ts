@@ -1,4 +1,3 @@
-
 import { SetStateAction, useState } from 'react';
 import { Product, Order, User, DeliveryUpdate, StockTransaction, InventoryHistory } from '../types';
 import { products as mockProducts, orders as mockOrders, users as mockUsers, deliveryUpdates as mockDeliveryUpdates, inventoryHistory as mockInventoryHistory } from './mockData';
@@ -172,6 +171,19 @@ const useDataStore = () => {
     const getUser = (id: string) => users.find((u) => u._id === id);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateUser = (user: any) => {
+        if (currentUser) {
+            const updatedUser = {
+                ...currentUser,
+                ...user
+            };
+            setCurrentUser(updatedUser);
+            return updatedUser;
+        }
+        return null;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const login = (user: any) => {
 
         if (user) {
@@ -294,6 +306,7 @@ const useDataStore = () => {
         login,
         logout,
         getCurrentUser,
+        updateUser,
 
         // Delivery operations
         getDeliveryUpdates,

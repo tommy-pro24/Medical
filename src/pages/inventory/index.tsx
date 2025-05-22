@@ -1,16 +1,15 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search, Plus, ShoppingCart, History } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { Product } from "@/types";
 import { useData } from "@/context/DataContext";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { request } from "@/lib/request";
-import ProductItem from "@/components/inventory/product";
-import { useWebSocketContext } from "@/context/WebSocketContext";
 import NewOrder from "@/components/inventory/newOrder";
-import Link from "next/link";
+import InventoryHeader from '@/components/inventory/InventoryHeader';
+import ProductGrid from '@/components/inventory/ProductGrid';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useWebSocketContext } from "@/context/WebSocketContext";
 
 interface InventoryProps {
     initialProducts?: Product[];
@@ -18,14 +17,13 @@ interface InventoryProps {
 
 const Inventory = ({ initialProducts }: InventoryProps) => {
     const { getProducts, updateProduct, setAllProduct, getCurrentUser } = useData();
+    const { sendMessage } = useWebSocketContext();
     const [search, setSearch] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [orderDialogOpen, setOrderDialogOpen] = useState(false);
     const [productCounts, setProductCounts] = useState<Record<string, number>>({});
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedProducts, setSelectedProducts] = useState<Record<string, number>>({});
-
-    const { sendMessage } = useWebSocketContext();
 
     const allProducts = getProducts();
     const products = initialProducts || allProducts;
@@ -205,68 +203,26 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
 
     return (
         <div className="space-y-6 w-full py-4 px-4 sm:px-6 md:px-10">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold">Inventory Management</h1>
-                {/* Only show Add New Product for non-client */}
-                {getCurrentUser()?.role !== 'client' &&
-                    <Button variant="outline" asChild>
-                        <Link href="/histories" className="flex items-center gap-2">
-                            <History className="h-4 w-4" />
-                            View History
-                        </Link>
-                    </Button>
-
-                }
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search products..."
-                        className="pl-10 w-full"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-                {currentUser?.role === 'admin' && (
-                    <Button onClick={handleAddProduct} className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add New Product
-                    </Button>
-                )}
-                {/* Show Order button for client */}
-                {currentUser?.role === 'client' && (
-                    <Button
-                        onClick={() => setOrderDialogOpen(true)}
-                        className="w-full sm:w-auto"
-                        disabled={Object.keys(selectedProducts).length === 0}
-                    >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Order
-                    </Button>
-                )}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map(product => {
-                    const isSelected = !!selectedProducts[product._id];
-                    return (
-                        // eslint-disable-next-line react/jsx-key
-                        <ProductItem
-                            key={product._id}
-                            product={product}
-                            isSelected={isSelected}
-                            currentUser={currentUser}
-                            handleSelectProduct={handleSelectProduct}
-                            selectedProducts={selectedProducts}
-                            productCounts={productCounts}
-                            setProductCounts={setProductCounts}
-                            handleUpdateStock={handleUpdateStock}
-                            handleProductQuantityChange={handleProductQuantityChange}
-                            handleEditProduct={handleEditProduct}
-                        />
-                    );
-                })}
-            </div>
+            <InventoryHeader
+                search={search}
+                setSearch={setSearch}
+                currentUserRole={currentUser?.role || ''}
+                onAddProduct={handleAddProduct}
+                onOrder={() => setOrderDialogOpen(true)}
+                orderDisabled={Object.keys(selectedProducts).length === 0}
+                selectedProductsCount={Object.keys(selectedProducts).length}
+            />
+            <ProductGrid
+                products={filteredProducts}
+                selectedProducts={selectedProducts}
+                productCounts={productCounts}
+                setProductCounts={setProductCounts}
+                currentUser={currentUser}
+                handleSelectProduct={handleSelectProduct}
+                handleUpdateStock={handleUpdateStock}
+                handleProductQuantityChange={handleProductQuantityChange}
+                handleEditProduct={handleEditProduct}
+            />
             {currentUser?.role === 'client' && (
                 <NewOrder
                     orderDialogOpen={orderDialogOpen}

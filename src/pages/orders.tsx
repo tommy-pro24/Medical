@@ -6,17 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import {
     ShoppingCart, Package, FileText, Truck,
-    ChevronRight, Search, Check, Sparkles
+    ChevronRight, Check, Sparkles
 } from 'lucide-react';
 import { Order } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { request } from '@/lib/request';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { DateRange } from 'react-day-picker';
 import { subDays } from 'date-fns';
+import OrdersHeader from '@/components/orders/OrdersHeader';
 
 const ORDER_STEPS = [
     { key: 'pending', label: 'Pending', icon: <Check className="h-4 w-4" /> },
@@ -47,54 +46,39 @@ export default function OrdersPage() {
     const [date, setDate] = React.useState<DateRange | undefined>({
         from: subDays(new Date(), 7),
         to: new Date(),
-    })
+    });
 
     useEffect(() => {
         if (lastMessage) {
             if (lastMessage.type === 'GET_ORDERS_ERROR') {
-
-                toast({
-                    title: "Get orders error",
-                    description: ""
-                })
+                toast({ title: "Get orders error", description: "" });
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastMessage]);
 
     useEffect(() => {
         if (getCurrentUser() && date?.from && date?.to) {
             onLoad();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getCurrentUser(), date])
+    }, [getCurrentUser(), date]);
 
     const onLoad = async () => {
-
         const response = await request({
             method: "POST",
             url: '/order/getAllOrders',
-            data: {
-                from: date?.from,
-                to: date?.to
-            },
+            data: { from: date?.from, to: date?.to },
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${getCurrentUser()?.token}`
             }
-        })
-
+        });
         setAllOrders(response);
-
-    }
+    };
 
     const currentUser = getCurrentUser();
-
-    // If client is logged in, filter orders to only show their orders
     const filteredOrders = currentUser?.role === 'client'
         ? getOrders()?.filter(o => o.clientId === currentUser._id)
         : getOrders();
-
     const searchedOrders = filteredOrders?.filter(order =>
         order?.id?.includes(search) ||
         order?.clientName.toLowerCase().includes(search.toLowerCase()) || order?.status.includes(search.toLowerCase())
@@ -116,59 +100,24 @@ export default function OrdersPage() {
         setDialogOpen(true);
     };
 
-    // const handleCreateOrder = () => {
-    //     setOrderDialogOpen(true);
-    // };
-
     const handleStatusChange = (id: string, newStatus: Order['status']) => {
         updateOrderStatus(id, newStatus);
-        toast({
-            title: 'Order Status Updated',
-            description: `Order #${id} status changed to ${newStatus}`
-        });
-
+        toast({ title: 'Order Status Updated', description: `Order #${id} status changed to ${newStatus}` });
         sendMessage({
             type: "SET_DISPATCHED",
-            payload: {
-                id, newStatus, token: getCurrentUser()?.token
-            },
+            payload: { id, newStatus, token: getCurrentUser()?.token },
             timestamp: Date.now(),
-        })
-
-        // Close dialog and refresh selected order
+        });
         setDialogOpen(false);
         setTimeout(() => {
             const updatedOrder = getOrders().find(o => o.id === id);
-            if (updatedOrder) {
-                setSelectedOrder(updatedOrder);
-                // setDialogOpen(true);
-            }
+            if (updatedOrder) setSelectedOrder(updatedOrder);
         }, 10);
     };
 
     return (
         <div className="space-y-6 w-full py-4 px-4 sm:px-6 md:px-10">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold">Orders Management</h1>
-                {/* {currentUser?.role === 'client' && (
-                    <Button onClick={handleCreateOrder} className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Order
-                    </Button>
-                )} */}
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search orders..."
-                        className="pl-10 w-full"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-                <DateRangePicker setDate={setDate} date={date} />
-            </div>
+            <OrdersHeader search={search} setSearch={setSearch} date={date} setDate={setDate} />
             <div className="flex flex-col gap-4">
                 {searchedOrders?.map(order => {
                     // Progress step logic
@@ -184,7 +133,7 @@ export default function OrdersPage() {
                                 <NewBadge />
                             ) : null}
                             <CardContent className="p-0 sm:p-5">
-                                {/* Truly Responsive Grid Layout: Left (order info), Center (progress), Right (client/amount) */}
+                                {/* Responsive Grid Layout: Left (order info), Center (progress), Right (client/amount) */}
                                 <div className="w-full px-4 pb-4">
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 sm:gap-x-6 items-center">
                                         {/* Left: Order Info */}

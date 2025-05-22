@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LayoutDashboard, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
@@ -107,6 +107,12 @@ export default function List() {
                                 <NotificationBadge count={getNewOrders()} variant="orders" />
                             }
                         </Link>
+                        <Link href="/profile" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/profile') ? 'bg-gray-700' : ''}`}>
+                            <div className='flex'>
+                                <UserRound className="w-5 h-5 mr-3" />
+                                Profile
+                            </div>
+                        </Link>
                         {getCurrentUser()?.role === 'admin' &&
                             <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
                                 <Truck className="w-5 h-5 mr-3" />
@@ -192,7 +198,7 @@ export default function List() {
                                     </Link>
                                 </div>
                             </div>
-                            <Link href="/orders" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
+                            <Link href="/orders" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
                                 <div className='flex'>
                                     <Truck className="w-5 h-5 mr-3" />
                                     Orders/Delivery
@@ -201,6 +207,16 @@ export default function List() {
                                     <NotificationBadge count={getNewOrders()} variant="orders" />
                                 }
                             </Link>
+                            <Link href="/profile" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/profile') ? 'bg-gray-700' : ''}`}>
+                                <UserRound className="w-5 h-5 mr-3" />
+                                Profile
+                            </Link>
+                            {getCurrentUser()?.role === 'admin' &&
+                                <Link href="/inventory/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
+                                    <Truck className="w-5 h-5 mr-3" />
+                                    userManagement
+                                </Link>
+                            }
                         </nav>
                     </div>
                 </aside>

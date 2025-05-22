@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { useForm } from 'react-hook-form';
-import { UserCog, Search } from 'lucide-react';
+import { UserCog } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { request } from '@/lib/request';
+import UserManagementHeader from '@/components/userManagement/UserManagementHeader';
 
 type User = {
     _id: string,
@@ -134,59 +135,71 @@ const UserManagement = () => {
 
     // Render items for pagination
     const renderUsers = (items: User[]) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
+        <>
+            {/* Table for desktop */}
+            <div className="hidden sm:block overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="min-w-[120px]">Name</TableHead>
+                            <TableHead className="min-w-[200px]">Email</TableHead>
+                            <TableHead className="min-w-[100px]">Role</TableHead>
+                            <TableHead className="min-w-[100px]">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {items.map(user => (
+                            <TableRow key={user._id}>
+                                <TableCell className="font-medium">{user.name}</TableCell>
+                                <TableCell className="break-all">{user.email}</TableCell>
+                                <TableCell className="capitalize">{user.role}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => openEditUserDialog(user)}
+                                        disabled={currentUser?._id === user._id}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        <UserCog className="mr-2 h-4 w-4" />
+                                        <span className="hidden sm:inline">Edit</span>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+            {/* Card/List for mobile */}
+            <div className="sm:hidden space-y-4">
                 {items.map(user => (
-                    <TableRow key={user._id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell className="capitalize">{user.role}</TableCell>
-                        <TableCell>
+                    <div key={user._id} className="rounded-lg border border-border bg-background p-4 flex flex-col gap-2 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <span className="font-semibold">{user.name}</span>
+                            <span className="capitalize text-xs px-2 py-1 rounded bg-muted-foreground/10 text-muted-foreground">{user.role}</span>
+                        </div>
+                        <div className="text-xs break-all text-muted-foreground">{user.email}</div>
+                        <div className="flex justify-end mt-2">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => openEditUserDialog(user)}
-                                disabled={currentUser?._id === user._id} // Prevent editing own account
+                                disabled={currentUser?._id === user._id}
+                                className="w-full"
                             >
-                                <UserCog className="mr-2" />
+                                <UserCog className="mr-2 h-4 w-4" />
                                 Edit
                             </Button>
-                        </TableCell>
-                    </TableRow>
+                        </div>
+                    </div>
                 ))}
-            </TableBody>
-        </Table>
+            </div>
+        </>
     );
 
     return (
-        <div className="p-6 max-w-7xl mx-auto w-full">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold">User Management</h1>
-                    <p className="text-muted-foreground">Manage system users and clients</p>
-                </div>
-            </div>
-
-            <div className="mb-6">
-                <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search users..."
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-            </div>
-
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto w-full">
+            <UserManagementHeader search={searchTerm} setSearch={setSearchTerm} />
             <PaginatedItems
                 items={filteredUsers}
                 itemsPerPage={10}
@@ -196,12 +209,12 @@ const UserManagement = () => {
 
             {/* User Form Dialog */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="text-lg sm:text-xl">
                             {editingUser ? 'Edit User' : 'Add New Client'}
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="text-sm sm:text-base">
                             {editingUser
                                 ? 'Make changes to the user account details.'
                                 : 'Fill in the information to create a new client user.'}
@@ -215,7 +228,7 @@ const UserManagement = () => {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel className="text-sm sm:text-base">Name</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Enter full name" {...field} />
                                         </FormControl>
@@ -229,7 +242,7 @@ const UserManagement = () => {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel className="text-sm sm:text-base">Email</FormLabel>
                                         <FormControl>
                                             <Input placeholder="email@example.com" type="email" {...field} />
                                         </FormControl>
@@ -243,10 +256,10 @@ const UserManagement = () => {
                                 name="role"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Role</FormLabel>
+                                        <FormLabel className="text-sm sm:text-base">Role</FormLabel>
                                         <FormControl>
                                             <select
-                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                 {...field}
                                             >
                                                 <option value="client">Client</option>
@@ -254,7 +267,7 @@ const UserManagement = () => {
                                                 <option value="admin">Admin</option>
                                             </select>
                                         </FormControl>
-                                        <FormDescription>
+                                        <FormDescription className="text-xs sm:text-sm">
                                             {!editingUser && 'New clients default to "Client" role.'}
                                         </FormDescription>
                                         <FormMessage />
@@ -263,7 +276,7 @@ const UserManagement = () => {
                             />
 
                             <DialogFooter>
-                                <Button type="submit">
+                                <Button type="submit" className="w-full sm:w-auto">
                                     Save Changes
                                 </Button>
                             </DialogFooter>
