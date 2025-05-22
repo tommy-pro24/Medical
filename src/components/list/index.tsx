@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react';
-import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
-import Cookies from 'js-cookie';
 import { NotificationBadge } from "../ui/notification-badge";
 
 export default function List() {
@@ -14,19 +13,11 @@ export default function List() {
 
     const [inventoryOpen, setInventoryOpen] = useState(false);
 
-    const { logout, getNewOrders, getCurrentUser, getProducts } = useData();
+    const { getNewOrders, getCurrentUser, getProducts } = useData();
 
     const pathname = usePathname();
 
     const router = useRouter();
-
-    const handleLogout = () => {
-
-        logout(); Cookies.set('id', '');
-
-        router.push('/login/siginin');
-
-    };
 
     const isActive = (path: string) => pathname === path;
 
@@ -117,21 +108,12 @@ export default function List() {
                             }
                         </Link>
                         {getCurrentUser()?.role === 'admin' &&
-                            <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
+                            <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
                                 <Truck className="w-5 h-5 mr-3" />
                                 userManagement
                             </Link>
                         }
                     </nav>
-                </div>
-                <div className="pt-4 border-t border-gray-700">
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-all duration-200 group"
-                    >
-                        <LogOut className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform duration-200" />
-                        Logout
-                    </button>
                 </div>
             </aside>
             <button
@@ -210,7 +192,7 @@ export default function List() {
                                     </Link>
                                 </div>
                             </div>
-                            <Link href="/orders" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
+                            <Link href="/orders" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
                                 <div className='flex'>
                                     <Truck className="w-5 h-5 mr-3" />
                                     Orders/Delivery
@@ -220,15 +202,6 @@ export default function List() {
                                 }
                             </Link>
                         </nav>
-                    </div>
-                    <div className="pt-4 border-t border-gray-700">
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center w-full px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-all duration-200 group"
-                        >
-                            <LogOut className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform duration-200" />
-                            Logout
-                        </button>
                     </div>
                 </aside>
                 <div className="flex-1" onClick={() => setOpen(false)} />
