@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/types";
 import { useData } from "@/context/DataContext";
 import { toast } from "@/hooks/use-toast";
@@ -16,7 +16,7 @@ interface InventoryProps {
 }
 
 const Inventory = ({ initialProducts }: InventoryProps) => {
-    const { getProducts, updateProduct, setAllProduct, getCurrentUser, getSelectedProducts, updateSelectedProduct, setSelectedProductsState } = useData();
+    const { getProducts, updateProduct, getCurrentUser, getSelectedProducts, updateSelectedProduct, setSelectedProductsState } = useData();
     const { sendMessage } = useWebSocketContext();
     const [search, setSearch] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,30 +34,6 @@ const Inventory = ({ initialProducts }: InventoryProps) => {
         product.category.toLowerCase().includes(search.toLowerCase()) ||
         product.description.toLowerCase().includes(search.toLowerCase())
     );
-
-    useEffect(() => {
-        onLoad();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    const onLoad = async () => {
-        try {
-            const data = await request({
-                method: 'POST',
-                url: '/product/getAllProduct',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!data) return;
-            setAllProduct(data);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.log(error.message);
-            }
-        }
-    }
 
     const handleUpdateStock = (productId: string, newStock: number) => {
         try {
@@ -253,11 +229,29 @@ const ProductForm: React.FC<{
     const { addProduct, updateProduct, getCurrentUser } = useData();
 
     const [name, setName] = useState(product?.name || '');
-    const [category, setCategory] = useState<Product['category']>(product?.category || 'diagnostic');
+    const [category, setCategory] = useState<string>(product?.category || '');
     const [description, setDescription] = useState(product?.description || '');
     const [price, setPrice] = useState(product?.price?.toString() || '');
     const [stockLevel, setStockLevel] = useState(product?.stockNumber?.toString() || '');
     const [lowStockThreshold, setLowStockThreshold] = useState(product?.lowStockThreshold?.toString() || '');
+    const [categories, setCategories] = useState<{ _id: string, name: string }[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const response = await request({
+                url: '/category/getAllCategories',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCurrentUser()?.token}`
+                }
+            });
+            if (response && Array.isArray(response.data)) {
+                setCategories(response.data);
+            }
+        };
+        fetchCategories();
+    }, [getCurrentUser]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -350,13 +344,13 @@ const ProductForm: React.FC<{
                 <select
                     id="category"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as Product['category'])}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                    <option value="diagnostic">Diagnostic</option>
-                    <option value="surgical">Surgical</option>
-                    <option value="consumable">Consumable</option>
-                    <option value="other">Other</option>
+                    <option value="">Select a category</option>
+                    {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
                 </select>
             </div>
 

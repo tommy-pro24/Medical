@@ -23,9 +23,9 @@ const InventoryHeader: React.FC<InventoryHeaderProps> = ({
     orderDisabled,
     selectedProductsCount,
 }) => (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-col gap-y-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold">Inventory Management</h1>
+            <h1 className="text-3xl font-bold">Inventory</h1>
             {currentUserRole !== 'client' && (
                 <Button variant="outline" asChild>
                     <Link href="/histories" className="flex items-center gap-2">
@@ -62,7 +62,7 @@ const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                 </Button>
             )}
         </div>
-    </div>
+    </div >
 );
 
 export default InventoryHeader; 

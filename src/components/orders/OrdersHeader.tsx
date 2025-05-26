@@ -14,7 +14,7 @@ interface OrdersHeaderProps {
 const OrdersHeader: React.FC<OrdersHeaderProps> = ({ search, setSearch, date, setDate }) => (
     <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold">Orders Management</h1>
+            <h1 className="text-3xl font-bold">Orders</h1>
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full sm:w-96">

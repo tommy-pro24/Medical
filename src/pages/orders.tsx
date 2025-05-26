@@ -25,7 +25,7 @@ const ORDER_STEPS = [
 ] as const;
 
 export const metadata: Metadata = {
-    title: 'Orders Management',
+    title: 'Orders',
     description: 'Manage and track your orders',
 };
 
@@ -100,7 +100,7 @@ export default function OrdersPage() {
         setDialogOpen(true);
     };
 
-    const handleStatusChange = (id: string, newStatus: Order['status']) => {
+    const handleStatusChange = async (id: string, newStatus: Order['status']) => {
         updateOrderStatus(id, newStatus);
         toast({ title: 'Order Status Updated', description: `Order #${id} status changed to ${newStatus}` });
         sendMessage({
@@ -108,6 +108,7 @@ export default function OrdersPage() {
             payload: { id, newStatus, token: getCurrentUser()?.token },
             timestamp: Date.now(),
         });
+
         setDialogOpen(false);
         setTimeout(() => {
             const updatedOrder = getOrders().find(o => o.id === id);
@@ -262,7 +263,7 @@ export default function OrdersPage() {
                                                     onClick={() => handleStatusChange(selectedOrder.id, 'in-transit')}
                                                 >
                                                     <Truck className="h-4 w-4" />
-                                                    Mark as In Transit
+                                                    In Transit
                                                 </Button>
                                             }
                                             {getCurrentUser()?.role === 'admin' &&
@@ -274,7 +275,7 @@ export default function OrdersPage() {
                                                         onClick={() => handleStatusChange(selectedOrder.id, 'dispatched')}
                                                     >
                                                         <Package className="h-4 w-4" />
-                                                        Mark as Dispatched
+                                                        Dispatched
                                                     </Button>
 
                                                     <Button

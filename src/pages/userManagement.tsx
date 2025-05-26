@@ -111,7 +111,7 @@ const UserManagement = () => {
 
             await request({
                 method: "POST",
-                url: "/api/auth/updateUser",
+                url: "/auth/updateUser",
                 data: {
                     _id: editingUser._id,
                     name: data.name,

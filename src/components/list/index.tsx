@@ -1,43 +1,88 @@
 'use client'
 
-import { useState } from 'react';
-import { Menu, Package, Stethoscope, Syringe, Truck, ChevronDown, LayoutDashboard, UserRound } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, Package, Truck, ChevronDown, LayoutDashboard, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
 import { NotificationBadge } from "../ui/notification-badge";
+import { request } from "@/lib/request";
+
+interface Category {
+    _id: string;
+    name: string;
+    description?: string;
+}
 
 export default function List() {
-
     const [open, setOpen] = useState(false);
-
     const [inventoryOpen, setInventoryOpen] = useState(false);
-
+    const [categories, setCategories] = useState<Category[]>([]);
     const { getNewOrders, getCurrentUser, getProducts } = useData();
-
     const pathname = usePathname();
-
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const response: any = await request<Category[]>({
+                url: '/category/getAllCategories',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCurrentUser()?.token}`
+                }
+            });
+            setCategories(response.data);
+        };
+        if (getCurrentUser()) fetchCategories();
+    }, [getCurrentUser]);
 
     const isActive = (path: string) => pathname === path;
 
     const products = getProducts();
 
-    const getLowStockCount = (category?: string) => {
+    const getLowStockCount = (categoryId?: string) => {
         return products.filter(product =>
             product.stockNumber <= product.lowStockThreshold &&
-            (!category || product.category === category)
+            (!categoryId || product.category === categoryId)
         ).length;
     };
 
     const totalLowStock = getLowStockCount();
-    const diagnosticLowStock = getLowStockCount('diagnostic');
-    const surgicalLowStock = getLowStockCount('surgical');
-    const consumableLowStock = getLowStockCount('consumable');
+
+    const renderInventoryLinks = (isMobile = false) => (
+        <div className={`space-y-1 ${isMobile ? 'ml-5' : 'ml-3'} overflow-hidden transition-all duration-200 ${inventoryOpen ? 'max-h-96' : 'max-h-0'}`}>
+            <Link href="/inventory" className={`flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
+                <div className='flex'>
+                    <Package className="w-5 h-5 mr-3" />
+                    All
+                </div>
+                {getCurrentUser()?.role !== 'client' &&
+                    <NotificationBadge count={totalLowStock} variant="inventory" />
+                }
+            </Link>
+            {categories && categories?.map((category) => (
+                <Link
+                    key={category._id}
+                    href={`/inventory/${category._id}`}
+                    className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive(`/inventory/${category._id}`) ? 'bg-gray-700' : ''}`}
+                >
+                    <div className='flex'>
+                        <Package className="w-5 h-5 mr-3" />
+                        {category.name}
+                    </div>
+                    {getCurrentUser()?.role !== 'client' &&
+                        <NotificationBadge count={getLowStockCount(category._id)} variant="inventory" />
+                    }
+                </Link>
+            ))}
+        </div>
+    );
 
     return (
         <>
-            <aside className="hidden md:flex w-[240px] h-screen bg-[#0c1322] border-r border-gray-700 p-4 sticky top-0  flex-col">
+            <aside className="hidden md:flex w-[240px] h-screen bg-[#0c1322] border-r border-gray-700 p-4 sticky top-0 flex-col">
                 <div className="space-y-4 flex-grow">
                     <h2 className="text-xl font-semibold text-white mb-4">Navigation</h2>
                     <nav className="space-y-2">
@@ -59,44 +104,7 @@ export default function List() {
                                 </div>
                                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${inventoryOpen ? 'rotate-180' : ''}`} />
                             </button>
-                            <div className={`space-y-1 overflow-hidden ml-3 transition-all duration-200 ${inventoryOpen ? 'max-h-48' : 'max-h-0'}`}>
-                                <Link href="/inventory" className={`flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
-                                    <div className='flex'>
-                                        <Package className="w-5 h-5 mr-3" />
-                                        All
-                                    </div>
-                                    {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={totalLowStock} variant="inventory" />
-                                    }
-                                </Link>
-                                <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
-                                    <div className='flex'>
-                                        <Stethoscope className="w-5 h-5 mr-3" />
-                                        Diagnostic
-                                    </div>
-                                    {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={diagnosticLowStock} variant="inventory" />
-                                    }
-                                </Link>
-                                <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
-                                    <div className=' flex'>
-                                        <Syringe className="w-5 h-5 mr-3" />
-                                        Surgical
-                                    </div>
-                                    {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={surgicalLowStock} variant="inventory" />
-                                    }
-                                </Link>
-                                <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
-                                    <div className='flex'>
-                                        <Package className="w-5 h-5 mr-3" />
-                                        Consumables
-                                    </div>
-                                    {getCurrentUser()?.role !== 'client' &&
-                                        <NotificationBadge count={consumableLowStock} variant="inventory" />
-                                    }
-                                </Link>
-                            </div>
+                            {renderInventoryLinks()}
                         </div>
                         <Link href="/orders" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
                             <div className='flex'>
@@ -113,12 +121,12 @@ export default function List() {
                                 Profile
                             </div>
                         </Link>
-                        {getCurrentUser()?.role === 'admin' &&
-                            <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
-                                <Truck className="w-5 h-5 mr-3" />
-                                userManagement
+                        {getCurrentUser()?.role === 'admin' && (
+                            <Link href="/categories" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/categories') ? 'bg-gray-700' : ''}`}>
+                                <Package className="w-5 h-5 mr-3" />
+                                Manage Categories
                             </Link>
-                        }
+                        )}
                     </nav>
                 </div>
             </aside>
@@ -159,44 +167,7 @@ export default function List() {
                                     </div>
                                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${inventoryOpen ? 'rotate-180' : ''}`} />
                                 </button>
-                                <div className={`space-y-1 ml-5 overflow-hidden transition-all duration-200 ${inventoryOpen ? 'max-h-48' : 'max-h-0'}`}>
-                                    <Link href="/inventory" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory') ? 'bg-gray-700' : ''}`}>
-                                        <div className='flex'>
-                                            <Package className="w-5 h-5 mr-3" />
-                                            All
-                                        </div>
-                                        {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={totalLowStock} variant="inventory" />
-                                        }
-                                    </Link>
-                                    <Link href="/inventory/diagnostic" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/diagnostic') ? 'bg-gray-700' : ''}`}>
-                                        <div className='flex'>
-                                            <Stethoscope className="w-5 h-5 mr-3" />
-                                            Diagnostic
-                                        </div>
-                                        {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={diagnosticLowStock} variant="inventory" />
-                                        }
-                                    </Link>
-                                    <Link href="/inventory/surgical" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/surgical') ? 'bg-gray-700' : ''}`}>
-                                        <div className='flex'>
-                                            <Syringe className="w-5 h-5 mr-3" />
-                                            Surgical
-                                        </div>
-                                        {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={surgicalLowStock} variant="inventory" />
-                                        }
-                                    </Link>
-                                    <Link href="/inventory/consumable" className={`flex justify-between items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/inventory/consumable') ? 'bg-gray-700' : ''}`}>
-                                        <div className='flex'>
-                                            <Package className="w-5 h-5 mr-3" />
-                                            Consumables
-                                        </div>
-                                        {getCurrentUser()?.role !== 'client' &&
-                                            <NotificationBadge count={consumableLowStock} variant="inventory" />
-                                        }
-                                    </Link>
-                                </div>
+                                {renderInventoryLinks(true)}
                             </div>
                             <Link href="/orders" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/orders') ? 'bg-gray-700' : ''}`}>
                                 <div className='flex'>
@@ -211,17 +182,17 @@ export default function List() {
                                 <UserRound className="w-5 h-5 mr-3" />
                                 Profile
                             </Link>
-                            {getCurrentUser()?.role === 'admin' &&
-                                <Link href="/inventory/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
-                                    <Truck className="w-5 h-5 mr-3" />
-                                    userManagement
+                            {getCurrentUser()?.role === 'admin' && (
+                                <Link href="/categories" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/categories') ? 'bg-gray-700' : ''}`}>
+                                    <Package className="w-5 h-5 mr-3" />
+                                    Manage Categories
                                 </Link>
-                            }
+                            )}
                         </nav>
                     </div>
                 </aside>
                 <div className="flex-1" onClick={() => setOpen(false)} />
             </div>
         </>
-    )
+    );
 }
