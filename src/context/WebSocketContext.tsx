@@ -12,7 +12,7 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(undefin
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     // Convert https:// to wss:// for WebSocket connection
-    const wsUrl = 'https://52e6-202-87-221-237.ngrok-free.app'.replace('https://', 'wss://');
+    const wsUrl = 'wss://52e6-202-87-221-237.ngrok-free.app'.replace('https://', 'wss://');
     const { isConnected, lastMessage, sendMessage } = useWebSocket(wsUrl);
 
     return (
