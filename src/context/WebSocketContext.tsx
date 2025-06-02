@@ -11,7 +11,7 @@ interface WebSocketContextType {
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-    const { isConnected, lastMessage, sendMessage } = useWebSocket('http://localhost:5000');
+    const { isConnected, lastMessage, sendMessage } = useWebSocket('https://52e6-202-87-221-237.ngrok-free.app');
 
     return (
         <WebSocketContext.Provider value={{ isConnected, lastMessage, sendMessage }}>
