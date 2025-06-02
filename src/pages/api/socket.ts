@@ -51,4 +51,4 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
     res.end();
 };
 
-export default ioHandler; 
+export default ioHandler;
