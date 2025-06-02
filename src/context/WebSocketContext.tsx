@@ -11,7 +11,9 @@ interface WebSocketContextType {
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-    const { isConnected, lastMessage, sendMessage } = useWebSocket('https://52e6-202-87-221-237.ngrok-free.app');
+    // Convert https:// to wss:// for WebSocket connection
+    const wsUrl = 'https://52e6-202-87-221-237.ngrok-free.app'.replace('https://', 'wss://');
+    const { isConnected, lastMessage, sendMessage } = useWebSocket(wsUrl);
 
     return (
         <WebSocketContext.Provider value={{ isConnected, lastMessage, sendMessage }}>
