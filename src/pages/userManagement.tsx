@@ -21,6 +21,7 @@ type User = {
     name: string;
     email: string;
     role: 'admin' | 'warehouse' | 'client';
+    status?: 'verify' | 'unverify' | 'banned';
     // optionally add id or phone if needed
 };
 
@@ -133,6 +134,29 @@ const UserManagement = () => {
         }
     };
 
+    const handleStatusChange = async (userId: string, newStatus: 'verify' | 'unverify' | 'banned') => {
+        try {
+            await request({
+                method: "POST",
+                url: "/auth/updateUserStatus",
+                data: {
+                    _id: userId,
+                    status: newStatus
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCurrentUser()?.token}`
+                }
+            }, {
+                successMessage: `User status updated to ${newStatus}!`,
+                showToast: true
+            });
+            getUsers();
+        } catch (error) {
+            console.error('Error updating user status:', error);
+        }
+    };
+
     // Render items for pagination
     const renderUsers = (items: User[]) => (
         <>
@@ -144,7 +168,8 @@ const UserManagement = () => {
                             <TableHead className="min-w-[120px]">Name</TableHead>
                             <TableHead className="min-w-[200px]">Email</TableHead>
                             <TableHead className="min-w-[100px]">Role</TableHead>
-                            <TableHead className="min-w-[100px]">Actions</TableHead>
+                            <TableHead className="min-w-[100px]">Status</TableHead>
+                            <TableHead className="min-w-[180px]">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -153,17 +178,41 @@ const UserManagement = () => {
                                 <TableCell className="font-medium">{user.name}</TableCell>
                                 <TableCell className="break-all">{user.email}</TableCell>
                                 <TableCell className="capitalize">{user.role}</TableCell>
-                                <TableCell>
+                                <TableCell className="capitalize">{
+                                    user.status === 'verify' ? 'Allowed' :
+                                        'Not Allow'
+                                }</TableCell>
+                                <TableCell className="space-x-2">
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => openEditUserDialog(user)}
                                         disabled={currentUser?._id === user._id}
-                                        className="w-full sm:w-auto"
+                                        className="w-auto"
                                     >
                                         <UserCog className="mr-2 h-4 w-4" />
                                         <span className="hidden sm:inline">Edit</span>
                                     </Button>
+                                    {user.status !== 'verify' && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleStatusChange(user._id, 'verify')}
+                                            disabled={currentUser?._id === user._id}
+                                        >
+                                            Allow
+                                        </Button>
+                                    )}
+                                    {user.status !== 'unverify' && (
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => handleStatusChange(user._id, 'unverify')}
+                                            disabled={currentUser?._id === user._id}
+                                        >
+                                            Not Allow
+                                        </Button>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -179,17 +228,41 @@ const UserManagement = () => {
                             <span className="capitalize text-xs px-2 py-1 rounded bg-muted-foreground/10 text-muted-foreground">{user.role}</span>
                         </div>
                         <div className="text-xs break-all text-muted-foreground">{user.email}</div>
-                        <div className="flex justify-end mt-2">
+                        <div className="text-xs mt-1">Status: <span className="capitalize font-semibold">{
+                            user.status === 'verify' ? 'Allowed' :
+                                'Not Allow'
+                        }</span></div>
+                        <div className="flex flex-wrap gap-2 justify-end mt-2">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => openEditUserDialog(user)}
                                 disabled={currentUser?._id === user._id}
-                                className="w-full"
+                                className="w-auto"
                             >
                                 <UserCog className="mr-2 h-4 w-4" />
                                 Edit
                             </Button>
+                            {user.status !== 'verify' && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleStatusChange(user._id, 'verify')}
+                                    disabled={currentUser?._id === user._id}
+                                >
+                                    Allow
+                                </Button>
+                            )}
+                            {user.status !== 'unverify' && (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => handleStatusChange(user._id, 'unverify')}
+                                    disabled={currentUser?._id === user._id}
+                                >
+                                    Not Allow
+                                </Button>
+                            )}
                         </div>
                     </div>
                 ))}
