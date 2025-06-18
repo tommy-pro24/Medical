@@ -1,11 +1,17 @@
 'use client'
 
 import { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { request } from '@/lib/request';
 import { toast } from '../../hooks/use-toast';
+import Image from 'next/image';
+
+const ROLES = [
+    { value: 'client', label: 'Client' },
+    { value: 'warehouse', label: 'Warehouse' }
+] as const;
 
 export default function Signup() {
     const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +22,21 @@ export default function Signup() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [selectedRole, setSelectedRole] = useState<string>('client');
+    const [customAvatar, setCustomAvatar] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string>('');
+
+    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setCustomAvatar(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +46,7 @@ export default function Signup() {
         }
 
         // Basic validation
-        if (!email || !username || !phoneNumber || !password) {
+        if (!email || !username || !phoneNumber || !password || !selectedRole) {
             toast({
                 title: "Error",
                 description: "All fields are required",
@@ -35,15 +56,23 @@ export default function Signup() {
         }
 
         try {
+            const formData = new FormData();
+            formData.append('name', username.trim());
+            formData.append('email', email.trim());
+            formData.append('password', password);
+            formData.append('phone', phoneNumber.trim());
+            formData.append('role', selectedRole);
+
+            if (customAvatar) {
+                formData.append('avatar', customAvatar);
+            }
+
+            console.log(formData);
+
             const response = await request({
                 method: "POST",
                 url: "/auth/register",
-                data: {
-                    name: username.trim(),
-                    email: email.trim(),
-                    password: password,
-                    phone: phoneNumber.trim()
-                },
+                data: formData,
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -54,7 +83,6 @@ export default function Signup() {
             });
 
             if (response) {
-                // Redirect to login page or handle successful registration
                 window.location.href = '/login/signin';
             }
         } catch (error) {
@@ -251,6 +279,73 @@ export default function Signup() {
 
                         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                             <motion.div variants={itemVariants} className="space-y-4">
+                                {/* Avatar Selection */}
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex flex-col items-center space-y-4"
+                                >
+                                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500 bg-[#1a2234]">
+                                        {avatarPreview ? (
+                                            <Image
+                                                src={avatarPreview}
+                                                alt="Avatar preview"
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <User className="w-12 h-12 text-gray-400" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col items-center space-y-2">
+                                        <label className="relative cursor-pointer">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleAvatarChange}
+                                                className="hidden"
+                                            />
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                <Upload className="h-4 w-4" />
+                                                Upload Avatar
+                                            </motion.div>
+                                        </label>
+                                    </div>
+                                </motion.div>
+
+                                {/* Role Selection */}
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Select Role
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {ROLES.map((role) => (
+                                            <motion.button
+                                                key={role.value}
+                                                type="button"
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => setSelectedRole(role.value)}
+                                                className={`py-2 px-4 rounded-lg text-sm font-medium transition-all ${selectedRole === role.value
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-[#1a2234] text-gray-300 hover:bg-[#232b3b]'
+                                                    }`}
+                                            >
+                                                {role.label}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
