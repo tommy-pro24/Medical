@@ -9,7 +9,15 @@ const useDataStore = () => {
     const [users] = useState<User[]>(mockUsers);
     const [deliveryUpdates, setDeliveryUpdates] = useState<DeliveryUpdate[]>(mockDeliveryUpdates);
     const [stockTransactions, setStockTransactions] = useState<StockTransaction[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]); // Default to admin for demo
+    const [currentUser, setCurrentUser] = useState<User | null>(() => {
+        if (typeof window !== 'undefined') {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                return JSON.parse(savedUser);
+            }
+        }
+        return null;
+    });
     const [inventoryHistory, setInventoryHistory] = useState<InventoryHistory[]>(mockInventoryHistory);
     const [newOrders, setNewOrders] = useState(0);
     const [selectedProducts, setSelectedProducts] = useState<Record<string, number>>({});
@@ -188,23 +196,30 @@ const useDataStore = () => {
 
     const getUser = (id: string) => users.find((u) => u._id === id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateUser = (user: any) => {
+    const updateUser = (updatedFields: Partial<User>) => {
         if (currentUser) {
             const updatedUser = {
                 ...currentUser,
-                ...user
+                ...updatedFields,
             };
+
             setCurrentUser(updatedUser);
+
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            }
+
             return updatedUser;
         }
         return null;
-    }
+    };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const login = (user: any) => {
+    const login = (user: User) => {
 
         if (user) {
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+            }
             setCurrentUser(user);
             return user;
         }
@@ -213,9 +228,10 @@ const useDataStore = () => {
     };
 
     const logout = () => {
-
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('currentUser');
+        }
         setCurrentUser(null);
-
     };
 
     const getCurrentUser = () => currentUser;

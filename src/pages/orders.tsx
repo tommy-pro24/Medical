@@ -49,6 +49,11 @@ export default function OrdersPage() {
         to: new Date(),
     });
     const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
         if (lastMessage) {
@@ -78,6 +83,11 @@ export default function OrdersPage() {
     };
 
     const currentUser = getCurrentUser();
+
+    if (!isClient) {
+        return null;
+    }
+
     const filteredOrders = currentUser?.role === 'client'
         ? getOrders()?.filter(o => o.clientId === currentUser._id)
         : getOrders();

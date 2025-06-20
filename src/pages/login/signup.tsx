@@ -29,6 +29,27 @@ export default function Signup() {
     const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                toast({
+                    title: "Error",
+                    description: "File size must be less than 5MB",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                toast({
+                    title: "Error",
+                    description: "Only JPEG, PNG, GIF and WebP files are allowed",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             setCustomAvatar(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -63,19 +84,14 @@ export default function Signup() {
             formData.append('phone', phoneNumber.trim());
             formData.append('role', selectedRole);
 
-            if (customAvatar) {
+            if (customAvatar && customAvatar instanceof File) {
                 formData.append('avatar', customAvatar);
             }
-
-            console.log(formData);
 
             const response = await request({
                 method: "POST",
                 url: "/auth/register",
                 data: formData,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
             }, {
                 successMessage: "Registration successful! Please verify your email.",
                 errorMessage: "Registration failed. Please try again.",

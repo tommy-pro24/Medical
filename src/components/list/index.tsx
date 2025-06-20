@@ -19,24 +19,32 @@ export default function List() {
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
     const { getNewOrders, getCurrentUser, getProducts } = useData();
+    const currentUser = getCurrentUser();
     const pathname = usePathname();
     const router = useRouter();
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     useEffect(() => {
         const fetchCategories = async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const response: any = await request<Category[]>({
+            if (!currentUser) return;
+            const response = await request<{ data: Category[] }>({
                 url: '/category/getAllCategories',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getCurrentUser()?.token}`
+                    'Authorization': `Bearer ${currentUser.token}`
                 }
             });
-            setCategories(response.data);
+            if (response && response.data) {
+                setCategories(response.data);
+            }
         };
-        if (getCurrentUser()) fetchCategories();
-    }, [getCurrentUser]);
+        if (currentUser) fetchCategories();
+    }, [currentUser]);
 
     const isActive = (path: string) => pathname === path;
 
@@ -58,11 +66,11 @@ export default function List() {
                     <Package className="w-5 h-5 mr-3" />
                     All
                 </div>
-                {getCurrentUser()?.role !== 'client' &&
+                {isClient && currentUser?.role !== 'client' &&
                     <NotificationBadge count={totalLowStock} variant="inventory" />
                 }
             </Link>
-            {categories && categories?.map((category) => (
+            {isClient && categories && categories?.map((category) => (
                 <Link
                     key={category._id}
                     href={`/inventory/${category._id}`}
@@ -72,7 +80,7 @@ export default function List() {
                         <Package className="w-5 h-5 mr-3" />
                         {category.name}
                     </div>
-                    {getCurrentUser()?.role !== 'client' &&
+                    {isClient && currentUser?.role !== 'client' &&
                         <NotificationBadge count={getLowStockCount(category._id)} variant="inventory" />
                     }
                 </Link>
@@ -111,7 +119,7 @@ export default function List() {
                                 <Truck className="w-5 h-5 mr-3" />
                                 Orders/Delivery
                             </div>
-                            {Number(getNewOrders()) > 0 &&
+                            {isClient && Number(getNewOrders()) > 0 &&
                                 <NotificationBadge count={getNewOrders()} variant="orders" />
                             }
                         </Link>
@@ -121,13 +129,13 @@ export default function List() {
                                 Profile
                             </div>
                         </Link>
-                        {getCurrentUser()?.role === 'admin' && (
+                        {isClient && currentUser?.role === 'admin' && (
                             <Link href="/categories" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/categories') ? 'bg-gray-700' : ''}`}>
                                 <Package className="w-5 h-5 mr-3" />
                                 Manage Categories
                             </Link>
                         )}
-                        {getCurrentUser()?.role === 'admin' && (
+                        {isClient && currentUser?.role === 'admin' && (
                             <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
                                 <UserRound className="w-5 h-5 mr-3" />
                                 User Management
@@ -180,7 +188,7 @@ export default function List() {
                                     <Truck className="w-5 h-5 mr-3" />
                                     Orders/Delivery
                                 </div>
-                                {Number(getNewOrders()) > 0 &&
+                                {isClient && Number(getNewOrders()) > 0 &&
                                     <NotificationBadge count={getNewOrders()} variant="orders" />
                                 }
                             </Link>
@@ -188,13 +196,13 @@ export default function List() {
                                 <UserRound className="w-5 h-5 mr-3" />
                                 Profile
                             </Link>
-                            {getCurrentUser()?.role === 'admin' && (
+                            {isClient && currentUser?.role === 'admin' && (
                                 <Link href="/categories" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/categories') ? 'bg-gray-700' : ''}`}>
                                     <Package className="w-5 h-5 mr-3" />
                                     Manage Categories
                                 </Link>
                             )}
-                            {getCurrentUser()?.role === 'admin' && (
+                            {isClient && currentUser?.role === 'admin' && (
                                 <Link href="/userManagement" className={`flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all duration-200 hover:translate-x-1 ${isActive('/userManagement') ? 'bg-gray-700' : ''}`}>
                                     <UserRound className="w-5 h-5 mr-3" />
                                     User Management

@@ -32,7 +32,9 @@ const CategoryInventory = () => {
                     'Authorization': `Bearer ${getCurrentUser()?.token}`
                 }
             });
-            setCategories(response.data);
+            if (response && response.data) {
+                setCategories(response.data);
+            }
             setLoading(false);
         };
         if (getCurrentUser()) fetchCategories();

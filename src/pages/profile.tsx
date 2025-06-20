@@ -16,6 +16,7 @@ const profileFormSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters.'),
     email: z.string().email('Please enter a valid email address.'),
     phone: z.string().optional(),
+    avatar: z.any().optional(),
 });
 
 const passwordFormSchema = z.object({
@@ -39,6 +40,24 @@ const Profile = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string>('');
+    const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // Construct avatar URL
+    const getAvatarUrl = (avatarPath?: string) => {
+        if (!avatarPath) {
+            // Return a default avatar or placeholder if no avatar is set
+            return ''; // Let the UI handle a default
+        }
+        // The avatar path from the backend is relative, e.g., '/img/avatar.png'
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND || 'http://localhost:5000';
+        return `${backendUrl}${avatarPath}`;
+    };
 
     const profileForm = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -46,6 +65,7 @@ const Profile = () => {
             name: currentUser?.name || '',
             email: currentUser?.email || '',
             phone: currentUser?.phone || '',
+            avatar: currentUser?.avatar || '',
         },
     });
 
@@ -55,9 +75,11 @@ const Profile = () => {
                 name: currentUser.name,
                 email: currentUser.email,
                 phone: currentUser.phone || '',
+                avatar: currentUser.avatar || '',
             });
+            setAvatarPreview(getAvatarUrl(currentUser.avatar));
         }
-    }, [currentUser, profileForm]);
+    }, [currentUser, profileForm.reset]);
 
     const passwordForm = useForm<PasswordFormValues>({
         resolver: zodResolver(passwordFormSchema),
@@ -67,6 +89,10 @@ const Profile = () => {
             confirmPassword: '',
         },
     });
+
+    if (!isClient) {
+        return null;
+    }
 
     if (!currentUser) {
         return (
@@ -82,7 +108,10 @@ const Profile = () => {
             name: currentUser.name,
             email: currentUser.email,
             phone: currentUser.phone || '',
+            avatar: currentUser.avatar || '',
         });
+        setAvatarPreview(getAvatarUrl(currentUser.avatar));
+        setSelectedAvatarFile(null);
         setIsProfileEditing(false);
     };
 
@@ -95,30 +124,82 @@ const Profile = () => {
         setIsChangingPassword(false);
     };
 
-    const onProfileSubmit = (values: ProfileFormValues) => {
-        request({
-            method: 'POST',
-            url: `/auth/updateProfile`,
-            data: {
-                name: values.name,
-                email: values.email,
-                phone: values.phone,
-            },
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}`,
-            },
-        });
-        updateUser({
-            name: values.name,
-            email: values.email,
-            phone: values.phone,
-        });
-        toast({
-            title: 'Profile Updated',
-            description: 'Your profile information has been updated successfully.',
-        });
-        setIsProfileEditing(false);
+    // Avatar file change handler
+    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                toast({
+                    title: "Error",
+                    description: "File size must be less than 5MB",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                toast({
+                    title: "Error",
+                    description: "Only JPEG, PNG, GIF and WebP files are allowed",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            setSelectedAvatarFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const onProfileSubmit = async (values: ProfileFormValues) => {
+        try {
+            const formData = new FormData();
+            formData.append('name', values.name.trim());
+            formData.append('email', values.email.trim());
+            formData.append('phone', values.phone?.trim() || '');
+
+            if (selectedAvatarFile) {
+                formData.append('avatar', selectedAvatarFile);
+            }
+
+            const response = await request({
+                method: 'POST',
+                url: '/auth/updateProfileWithAvatar',
+                data: formData,
+                headers: {
+                    'Authorization': `Bearer ${currentUser.token}`,
+                },
+            }, {
+                successMessage: 'Profile updated successfully',
+                errorMessage: 'Failed to update profile',
+                showToast: true,
+            });
+
+            if (response && response.user) {
+                // Update the user context with new data
+                updateUser({
+                    name: response.user.name,
+                    email: response.user.email,
+                    phone: response.user.phone,
+                    avatar: response.user.avatar,
+                    token: response.user.token,
+                });
+
+                // Update avatar preview with new URL
+                setAvatarPreview(getAvatarUrl(response.user.avatar));
+                setSelectedAvatarFile(null);
+                setIsProfileEditing(false);
+            }
+        } catch (error) {
+            console.error('Profile update error:', error);
+        }
     };
 
     const onPasswordSubmit = async (values: PasswordFormValues) => {
@@ -155,13 +236,20 @@ const Profile = () => {
             <div className="space-y-8">
                 {/* Profile Card */}
                 <Card className="rounded-2xl shadow-xl border border-border/30 bg-background/80">
-                    <ProfileHeader name={currentUser.name} role={currentUser.role} />
+                    <ProfileHeader
+                        name={currentUser.name}
+                        role={currentUser.role}
+                        avatar={avatarPreview}
+                    />
                     <CardContent className="pt-0 pb-4">
                         {isProfileEditing ? (
                             <ProfileEditForm
                                 form={profileForm}
                                 onSubmit={onProfileSubmit}
                                 onCancel={handleProfileCancel}
+                                onAvatarChange={handleAvatarChange}
+                                avatarPreview={avatarPreview}
+                                setAvatarPreview={setAvatarPreview}
                             />
                         ) : (
                             <ProfileInfoGrid

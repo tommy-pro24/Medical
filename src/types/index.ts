@@ -1,4 +1,3 @@
-
 export interface User {
     password: string;
     _id: string;
@@ -7,6 +6,7 @@ export interface User {
     phone: string;
     role: 'admin' | 'warehouse' | 'client';
     token: string;
+    avatar?: string;
 }
 
 export interface Product {

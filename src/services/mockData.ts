@@ -1,8 +1,38 @@
-
 import { Product, Order, User, DeliveryUpdate, InventoryHistory } from '../types';
 
 // Mock Users
-export const users: User[] = [];
+export const users: User[] = [
+    {
+        _id: '1',
+        name: 'Admin User',
+        email: 'admin@example.com',
+        phone: '+1234567890',
+        role: 'admin',
+        password: 'admin123',
+        token: 'mock-token-123',
+        avatar: 'admin-avatar.jpg'
+    },
+    {
+        _id: '2',
+        name: 'Warehouse Manager',
+        email: 'warehouse@example.com',
+        phone: '+1234567891',
+        role: 'warehouse',
+        password: 'warehouse123',
+        token: 'mock-token-456',
+        avatar: 'warehouse-avatar.jpg'
+    },
+    {
+        _id: '3',
+        name: 'Client User',
+        email: 'client@example.com',
+        phone: '+1234567892',
+        role: 'client',
+        password: 'client123',
+        token: 'mock-token-789',
+        avatar: 'client-avatar.jpg'
+    }
+];
 
 // Mock Products
 export const products: Product[] = [];

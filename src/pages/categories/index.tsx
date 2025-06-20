@@ -31,7 +31,7 @@ export default function CategoriesPage() {
                 'Authorization': `Bearer ${getCurrentUser()?.token}`
             }
         });
-        if (response) {
+        if (response && response.data) {
             setCategories(response.data);
         }
     };
